@@ -305,7 +305,7 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
             <div class="devices" id="devices" role="group" aria-label="Choix de l'appareil">
               <button class="dev" type="button" aria-pressed="false" data-key="esp32"
                       data-name="ESP32 Standard" data-chip="ESP32" data-off="0" data-manifest="manifest-esp32.json"
-                      data-bin="EvilFoX1-0-2.bin" data-dl="https://github.com/FoX-hxck/EvilFoX/raw/refs/heads/main/EvilFoX1-0-2.bin">
+                      data-bin="EvilFoX2-0-0.bin" data-dl="https://github.com/F0X-hxck/EvilFoX/raw/refs/heads/main/EvilFoX2-0-0.bin">
                 <img src="esp32.png" alt="ESP32" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
                 <span>
                   <span class="n">ESP32</span>
@@ -420,7 +420,7 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
           <div class="code">
             <button class="copy" id="copyCmd" type="button" data-done="0" data-i18n="copy">copier</button>
             <pre id="cmd"><span class="c"># erase then write combined image at 0x0</span>
-<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX1-0-2.bin</span></pre>
+<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX2-0-0.bin</span></pre>
           </div>
           <div class="row" style="margin-top:.6rem">
             <button class="btn" id="copyCmd2" type="button" data-i18n="copy_no">copier sans le $</button>
@@ -891,7 +891,7 @@ function copy(txt,btnId){
   }
   log(t("clip"),"in");
 }
-function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX1-0-2.bin")}
+function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX2-0-0.bin")}
 var port="/dev/ttyUSB0";
 $('#ports').addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
@@ -910,7 +910,7 @@ function renderTree(){
   $('#tree').innerHTML=
   "<span class='c'>"+t("tree_root")+"</span>\n"+
   "index.html                    <span class='c'>"+t("tree_page")+"</span>\n"+
-  "EvilFoX1-0-2.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
+  "EvilFoX2-0-0.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
   "M5EvilFoX1-0-2.bin            <span class='c'>"+t("tree_m5")+"</span>\n"+
   "manifest-esp32.json           <span class='c'>"+t("tree_opt")+"</span>\n"+
   "manifest-m5.json              <span class='c'>"+t("tree_opt2")+"</span>\n"+
