@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#050506">
+<meta name="description" content="EvilFoX — installeur de firmware ESP32 / M5StickC Plus2. Flash Web Serial ou ligne de commande esptool.">
+<title>EVILFOX // FIRMWARE LOADER</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050506'/%3E%3Cpath d='M6 26 16 6l10 20-10-6z' fill='%239D4EDD'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<style>
+/* ============================================================
+   EVILFOX · loader terminal — thème type convention DEF CON
+   1 document / 1 feuille de style / 0 image externe / 0 icone polices
+   ============================================================ */
+:root{
+  --bg:#050506; --bg2:#0a0b0d; --panel:#0b0c0e; --panel2:#101214;
+  --line:#1e2126; --line2:#2b2f36;
+  --fg:#d7dbde; --fg2:#8b9199; --fg3:#5c636b;
+  --red:#9D4EDD; --red-d:#7B2FBE; --amber:#ffb300; --green:#39d373; --blue:#4cc9f0;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono","IBM Plex Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --sp:.5rem; --pad:clamp(.75rem,2.5vw,1.25rem); --hair:1px;
+  --max:1360px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);font:13px/1.55 var(--mono);
+  letter-spacing:.01em;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--red);color:#000}
+a{color:var(--red);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+h1,h2,h3,p,ul,ol,figure,pre{margin:0}
+ul,ol{padding:0;list-style:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.skip{position:absolute;left:.5rem;top:-3rem;z-index:99;background:var(--red);color:#000;padding:.5rem .75rem;font-weight:700}
+.skip:focus{top:.5rem}
+
+/* --- fond : pluie hex (canvas) + grille + scanlines --- */
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.16;pointer-events:none}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(90deg,var(--line) 1px,transparent 1px),linear-gradient(var(--line) 1px,transparent 1px);
+  background-size:80px 80px;opacity:.35;mask-image:radial-gradient(120% 90% at 50% 0,#000 30%,transparent 100%)}
+.scanlines{position:fixed;inset:0;z-index:60;pointer-events:none;mix-blend-mode:screen;opacity:.5;
+  background:repeating-linear-gradient(180deg,rgba(157,78,221,.045) 0 1px,transparent 1px 3px)}
+.crt-flicker{position:fixed;inset:0;z-index:59;pointer-events:none;background:radial-gradient(130% 100% at 50% 50%,transparent 55%,rgba(0,0,0,.85) 100%)}
+@keyframes flick{0%,96%{opacity:.5}97%{opacity:.82}98%{opacity:.35}100%{opacity:.5}}
+.scanlines{animation:flick 7s steps(1,end) infinite}
+
+.shell{position:relative;z-index:10;max-width:var(--max);margin:0 auto;padding:0 var(--pad) 3rem}
+
+/* --- barre de status --- */
+.topbar{display:flex;flex-wrap:wrap;gap:.25rem 1rem;align-items:center;justify-content:space-between;
+  border-bottom:var(--hair) solid var(--line);padding:.5rem 0;background:rgba(5,5,6,.9);position:sticky;top:0;z-index:40;backdrop-filter:blur(4px)}
+.lang-btn{border:var(--hair) solid var(--line2);background:#0a0b0d;color:var(--fg2);padding:.15rem .45rem;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;font-weight:700;transition:color .12s,border-color .12s}
+.lang-btn:hover{color:var(--red);border-color:var(--red)}
+.lang-btn b{color:var(--red);font-weight:700}
+.tb-l,.tb-r{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem 1rem;min-height:1.2rem}
+.lbl{color:var(--fg3);font-size:10px;text-transform:uppercase;letter-spacing:.14em}
+.val{color:var(--fg);font-size:11px}
+.val i{font-style:normal;color:var(--fg3)}
+.led{display:inline-block;width:6px;height:6px;background:var(--fg3);margin-right:.4rem;box-shadow:0 0 0 1px #000}
+.led.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.led.no{background:var(--red);box-shadow:0 0 6px var(--red)}
+.led.warn{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.blink{animation:blink 1.2s steps(1,end) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* --- entete --- */
+header.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.25rem;align-items:end;
+  border-bottom:2px solid var(--red);padding:1.75rem 0 1rem}
+.brand{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap}
+.brand h1{font-size:clamp(2.1rem,7.5vw,4.5rem);line-height:.9;font-weight:700;letter-spacing:-.045em;text-transform:uppercase;position:relative}
+.brand h1::after{content:attr(data-txt);position:absolute;inset:0;color:var(--red);opacity:.9;clip-path:inset(45% 0 42% 0);transform:translate(2px);mix-blend-mode:screen}
+.brand h1:hover::after{animation:glitch .45s steps(2,end) 2}
+@keyframes glitch{0%{transform:translate(3px,-1px);clip-path:inset(10% 0 70% 0)}50%{transform:translate(-3px,1px);clip-path:inset(60% 0 15% 0)}100%{transform:translate(1px,0);clip-path:inset(35% 0 45% 0)}}
+.tag{color:var(--red);font-weight:700;border:var(--hair) solid var(--red-d);padding:.15rem .4rem;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+.sub{color:var(--fg2);font-size:12px;margin-top:.5rem;max-width:56ch}
+.ascii{color:var(--red-d);font-size:9px;line-height:1.05;white-space:pre;overflow:hidden;user-select:none;opacity:.85}
+.ascii b{color:var(--red);font-weight:400}
+
+/* --- onglets --- */
+nav.tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:var(--hair) solid var(--line);margin:1rem 0 1.25rem}
+.tab{padding:.6rem 1rem;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg3);
+  border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;gap:.5rem;align-items:center;transition:color .12s}
+.tab kbd{font:inherit;color:var(--fg3);border:var(--hair) solid var(--line2);padding:0 .25rem}
+.tab:hover{color:var(--fg)}
+.tab[aria-selected=true]{color:var(--red);border-bottom-color:var(--red)}
+.tab[aria-selected=true] kbd{color:var(--red);border-color:var(--red-d)}
+section[hidden]{display:none}
+
+/* --- panneaux --- */
+.cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:1.25rem;align-items:start}
+@media (max-width:1000px){.cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:linear-gradient(180deg,var(--panel2),var(--panel));border:var(--hair) solid var(--line);position:relative;contain:paint}
+.panel>h2,.panel>.p-h{display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+  padding:.6rem var(--pad);border-bottom:var(--hair) solid var(--line);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--fg2);font-weight:700;background:rgba(255,255,255,.015)}
+.p-body{padding:var(--pad)}
+.p-h .idx{color:var(--red)}
+.hair{border:0;border-top:var(--hair) solid var(--line);margin:1rem 0}
+.cnr::before,.cnr::after{content:"";position:absolute;width:10px;height:10px;border:2px solid var(--red);pointer-events:none}
+.cnr::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.cnr::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+
+/* --- grille appareils --- */
+.devices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem}
+.dev{display:grid;grid-template-columns:64px minmax(0,1fr);gap:.75rem;align-items:center;text-align:left;
+  padding:.75rem;background:#08090b;border:var(--hair) solid var(--line2);position:relative;
+  transition:border-color .12s,transform .12s,background .12s;will-change:transform}
+.dev:hover{border-color:var(--red-d);transform:translateY(-2px);background:#0c0d10}
+.dev[aria-pressed=true]{border-color:var(--red);background:linear-gradient(180deg,rgba(157,78,221,.10),rgba(157,78,221,.02))}
+.dev[aria-pressed=true]::after{content:"● ACTIF";position:absolute;top:.4rem;right:.5rem;font-size:9px;letter-spacing:.15em;color:var(--red)}
+.dev svg{width:64px;height:48px;display:block;shape-rendering:geometricPrecision}
+.dev .n{font-weight:700;font-size:13px;letter-spacing:.02em}
+.dev .d{color:var(--fg3);font-size:10.5px;margin-top:.15rem}
+.dev .chip{display:inline-block;margin-top:.4rem;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);border:var(--hair) solid var(--line2);padding:.05rem .3rem}
+
+/* --- kv --- */
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:var(--hair) solid var(--line);margin-top:1rem}
+.kv div{background:#08090b;padding:.55rem .65rem;display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.kv dt,.kv .k{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg3)}
+.kv dd,.kv .v{font-size:12px;color:var(--fg);overflow-wrap:anywhere}
+.kv .v.on{color:var(--red)}
+
+/* --- CTA --- */
+.cta{position:relative;margin-top:1rem}
+.cta-btn{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.75rem;align-items:center;
+  padding:.9rem 1rem;background:var(--red);color:#0a0000;font-weight:700;font-size:clamp(.9rem,2.4vw,1.05rem);
+  letter-spacing:.18em;text-transform:uppercase;  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  transition:filter .12s,transform .12s}
+.cta-btn .g{font-size:.85em}
+.cta-btn:hover{filter:brightness(1.12)}
+.cta-btn:active{transform:translateY(1px)}
+.cta-btn[data-state=busy]{background:var(--amber);border-color:#ffd873;animation:pulse 1s ease-in-out infinite}
+.cta-btn[data-state=ok]{background:var(--green);border-color:#8ff0b6}
+.cta-btn[data-state=err]{background:var(--red-d);border-color:var(--red);color:#ffe3e3}
+.cta-btn[disabled]{background:#141619;color:var(--fg3);border-color:var(--line2);cursor:not-allowed;filter:none}
+@keyframes pulse{50%{filter:brightness(1.25)}}
+.cta .meta{position:absolute;right:0;top:-1.35rem;font-size:9.5px;letter-spacing:.14em;color:var(--fg3);text-transform:uppercase}
+#espHost{position:absolute;inset:0;opacity:0;pointer-events:none;overflow:hidden}
+#espHost esp-web-install-button,#espHost button,#espHost span{all:unset;display:block;width:100%;height:100%}
+
+/* --- avertissement legal --- */
+.warn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.6rem;align-items:start;margin-top:1rem;
+  border:var(--hair) solid var(--amber);border-left-width:3px;background:rgba(255,179,0,.06);padding:.7rem .8rem}
+.warn .i{color:var(--amber);font-weight:700}
+.warn p{font-size:11.5px;color:#e8d9b0}
+.warn p+p{margin-top:.35rem}
+
+/* --- terminal / journal --- */
+.term{background:#000;border:var(--hair) solid var(--line2)}
+.term-h{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border-bottom:var(--hair) solid var(--line);background:#0a0b0d}
+.term-h .dots{display:flex;gap:.3rem;margin-left:auto}
+.term-h .dots i{width:7px;height:7px;background:var(--line2);display:block}
+.term-h .dots i:first-child{background:var(--red-d)}
+.term-h b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg2);font-weight:700}
+.log{padding:.5rem .6rem;height:190px;overflow-y:auto;font-size:11.5px;line-height:1.5;overscroll-behavior:contain;scrollbar-width:thin}
+.log p{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.5rem;padding:.05rem 0}
+.log .t{color:var(--fg3)}
+.log .s{font-weight:700}
+.log .s.in{color:var(--blue)}.log .s.ok{color:var(--green)}.log .s.wr{color:var(--amber)}.log .s.er{color:var(--red)}.log .s.rn{color:var(--red)}
+.log::-webkit-scrollbar{width:8px}.log::-webkit-scrollbar-track{background:#000}.log::-webkit-scrollbar-thumb{background:var(--line2)}
+.log::-webkit-scrollbar-thumb:hover{background:var(--red-d)}
+
+/* --- fonctionnalites --- */
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);border:var(--hair) solid var(--line)}
+.feats li{background:#08090b;padding:.55rem .65rem;font-size:11px;color:var(--fg2);display:flex;gap:.45rem;align-items:center}
+.feats li::before{content:"";width:5px;height:5px;background:var(--red);flex:none}
+
+/* --- changelog --- */
+.log-list{max-height:420px;overflow-y:auto;scrollbar-width:thin}
+.log-list li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.75rem;padding:.6rem var(--pad);border-bottom:var(--hair) solid var(--line);content-visibility:auto;contain-intrinsic-size:auto 48px}
+.log-list li:hover{background:rgba(157,78,221,.04)}
+.log-list time{font-size:10px;color:var(--fg3);letter-spacing:.06em;white-space:nowrap;padding-top:.1rem}
+.log-list p{font-size:11.5px;color:var(--fg2)}
+.log-list .v{color:var(--red);font-weight:700}
+
+/* --- cli --- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--line);border:var(--hair) solid var(--line);margin-bottom:1rem}
+.steps li{background:#08090b;padding:.7rem .8rem;counter-increment:s}
+.steps .st{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--red)}
+.steps b{display:block;font-size:12.5px;margin:.2rem 0 .25rem}
+.steps p{font-size:11px;color:var(--fg3)}
+.code{position:relative;background:#000;border:var(--hair) solid var(--red-d)}
+.code pre{padding:.75rem .8rem;overflow-x:auto;font-size:12px;line-height:1.7;color:#e6ffed;scrollbar-width:thin}
+.code pre::-webkit-scrollbar{height:8px}.code .p{color:var(--green);font-weight:700}.code .c{color:var(--fg3)}.code .f{color:var(--amber)}
+.copy{position:absolute;top:.4rem;right:.4rem;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);
+  border:var(--hair) solid var(--line2);padding:.25rem .5rem;background:#0a0b0d;transition:color .12s,border-color .12s}
+.copy:hover{color:var(--red);border-color:var(--red)}
+.copy[data-done="1"]{color:var(--green);border-color:var(--green)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem .85rem;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  border:var(--hair) solid var(--line2);background:#0a0b0d;color:var(--fg);transition:border-color .12s,color .12s,transform .12s}
+.btn:hover{border-color:var(--red);color:var(--red);transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn.prime{border-color:var(--red);color:#0a0000;background:var(--red)}
+.btn.prime:hover{filter:brightness(1.12);color:#0a0000}
+.seg{display:flex;flex-wrap:wrap;gap:.35rem}
+.seg button{font-size:11px;padding:.3rem .55rem;border:var(--hair) solid var(--line2);color:var(--fg2);transition:.12s}
+.seg button:hover{border-color:var(--red);color:var(--red)}
+.seg button[aria-pressed=true]{background:var(--red);border-color:var(--red);color:#0a0000;font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.row .sp{margin-left:auto}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.75rem;margin-top:.75rem}
+.dl a{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.6rem;align-items:center;border:var(--hair) solid var(--line2);background:#08090b;padding:.7rem .8rem;color:var(--fg);transition:.12s}
+.dl a:hover{border-color:var(--red);text-decoration:none;background:rgba(157,78,221,.05)}
+.dl .ar{color:var(--red);font-weight:700}
+.dl .t2{font-size:10px;color:var(--fg3);margin-top:.1rem}
+
+/* --- diag --- */
+.diag{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--line);border:var(--hair) solid var(--line)}
+.diag li{background:#08090b;padding:.6rem .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:center;font-size:11px}
+.diag .r{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3)}
+.diag .ok{color:var(--green)}.diag .no{color:var(--red)}.diag .wr{color:var(--amber)}
+details{border:var(--hair) solid var(--line);background:#08090b}
+details+details{border-top:0}
+summary{padding:.6rem .8rem;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.04em;display:flex;gap:.6rem;align-items:center;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";color:var(--red);font-weight:700}
+details[open] summary::before{content:"–"}
+summary:hover{background:rgba(157,78,221,.05)}
+details .in{padding:0 .8rem .7rem 1.85rem;font-size:11.5px;color:var(--fg2)}
+details .in code{color:var(--amber);background:#000;padding:.05rem .25rem;border:var(--hair) solid var(--line)}
+.bar{height:4px;background:var(--line2);position:relative;overflow:hidden;margin-top:.5rem}
+.bar i{position:absolute;inset:0 100% 0 0;background:var(--red);transition:right .3s linear}
+
+footer.foot{margin-top:2.5rem;border-top:var(--hair) solid var(--line);padding-top:1rem;
+  display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--fg3);letter-spacing:.06em}
+footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
+
+@media (max-width:720px){
+  header.hero{grid-template-columns:minmax(0,1fr)}
+  .ascii{display:none}
+  .log{height:150px}
+  .cta-btn{grid-template-columns:auto minmax(0,1fr)}
+  .cta-btn .arw{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  #rain{display:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#console">Aller à la console</a>
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="crt-flicker" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+
+<div class="shell">
+
+  <!-- ============ TOPBAR ============ -->
+  <div class="topbar" role="status" aria-live="polite">
+    <div class="tb-l">
+      <span class="lbl">node</span><span class="val">evilfox/loader</span>
+      <span class="lbl">rel</span><span class="val">2.0.0</span>
+      <span class="lbl">build</span><span class="val" id="buildId">—</span>
+      <span class="lbl">op</span><span class="val">FoXhack</span>
+    </div>
+    <div class="tb-r">
+      <span class="val"><span class="led" id="ledSerial"></span>web_serial</span>
+      <span class="val"><span class="led" id="ledSecure"></span><span data-i18n="secure_ctx">contexte sécurisé</span></span>
+      <span class="val"><span class="led" id="ledDev"></span>device</span>
+      <span class="val"><span id="langBtnWrap"><button class="lang-btn" id="langBtn" type="button" aria-label="Switch language"><b>FR</b> / EN</button></span></span>
+      <span class="val" id="clock">00:00:00</span>
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div>
+      <div class="brand">
+        <h1 data-txt="EVILFOX">EVILFOX</h1>
+        <span class="tag" data-i18n="tag_loader">firmware loader</span>
+      </div>
+      <p class="sub" data-i18n="hero_sub">EvilFox v2.0.0 — Evil Twin amélioré, vol d'identifiants, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code> / <code>FoXhack_Evil</code>. Usage éducatif, sur ton réseau uniquement.</p>
+    </div>
+    <figure class="ascii" aria-hidden="true"><b>      _,-=._              /|_/|
+      `-.)   `=._,.-=-._.,  @ @._,
+         `._ _,-.   )      _,.-'
+            `    G.m-"^m`m'</b></figure>
+  </header>
+
+  <!-- ============ TABS ============ -->
+  <nav class="tabs" role="tablist" aria-label="Modes d'installation">
+    <button class="tab" role="tab" id="t-web" aria-controls="console" aria-selected="true"><kbd>1</kbd><span data-i18n="tab_web">web flash</span></button>
+    <button class="tab" role="tab" id="t-cli" aria-controls="cli" aria-selected="false"><kbd>2</kbd><span data-i18n="tab_cli">cli · linux / macos</span></button>
+    <button class="tab" role="tab" id="t-diag" aria-controls="diag" aria-selected="false"><kbd>3</kbd><span data-i18n="tab_diag">diagnostic</span></button>
+    <button class="tab" role="tab" id="t-doc" aria-controls="doc" aria-selected="false"><kbd>4</kbd><span data-i18n="tab_doc">notes de version</span></button>
+  </nav>
+
+  <!-- ============ TAB 1 : WEB FLASH ============ -->
+  <section id="console" role="tabpanel" aria-labelledby="t-web" tabindex="-1">
+    <div class="cols">
+      <div>
+        <!-- selection -->
+        <div class="panel cnr">
+          <h2><span>01 · <span class="idx" data-i18n="target_panel">cible</span></span><span class="lbl" id="targetLbl" data-i18n="no_target">aucune cible</span></h2>
+          <div class="p-body">
+            <div class="devices" id="devices" role="group" aria-label="Choix de l'appareil">
+              <button class="dev" type="button" aria-pressed="false" data-key="esp32"
+                      data-name="ESP32 Standard" data-chip="ESP32" data-off="0" data-manifest="manifest-esp32.json"
+                      data-bin="EvilFoX1-0-2.bin" data-dl="https://github.com/FoX-hxck/EvilFoX/raw/refs/heads/main/EvilFoX1-0-2.bin">
+                <img src="esp32.png" alt="ESP32" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
+                <span>
+                  <span class="n">ESP32</span>
+                  <span class="d" data-i18n="dev_esp32_d">Devboard standard · 38 pins</span>
+                  <span class="chip" data-i18n="chip_combined">combined image · 0x0</span>
+                </span>
+              </button>
+              <button class="dev" type="button" aria-pressed="false" data-key="m5stick"
+                      data-name="M5StickC Plus2" data-chip="ESP32" data-off="0" data-manifest="manifest-m5.json"
+                      data-bin="M5EvilFoX1-0-2.bin" data-dl="https://github.com/FoX-hxck/EvilFoX/raw/refs/heads/main/M5EvilFoX1-0-2.bin">
+                <img src="m5.png" alt="M5StickC Plus2" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
+                <span>
+                  <span class="n">M5StickC Plus2</span>
+                  <span class="d" data-i18n="dev_m5_d">Stick 1.14" · PWR2 / G0 / G10</span>
+                  <span class="chip" data-i18n="chip_combined">combined image · 0x0</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="kv" id="kvTarget" aria-live="polite">
+              <div><span class="k" data-i18n="kv_target">cible</span><span class="v" id="kvName">—</span></div>
+              <div><span class="k" data-i18n="kv_chip">chip family</span><span class="v" id="kvChip">—</span></div>
+              <div><span class="k" data-i18n="kv_bin">binaire</span><span class="v" id="kvBin">—</span></div>
+              <div><span class="k" data-i18n="kv_manifest">manifest</span><span class="v" id="kvManifest">—</span></div>
+            </div>
+
+            <div class="cta">
+              <span class="meta" id="ctaMeta" data-i18n="cta_waiting">en attente de cible</span>
+              <button class="cta-btn" id="ctaBtn" type="button" data-state="idle" disabled>
+                <span class="g" aria-hidden="true">[ USB ]</span>
+                <span id="ctaTxt" data-i18n="cta_select">Sélectionne un appareil</span>
+                <span class="g arw" aria-hidden="true">&gt;&gt;</span>
+              </button>
+              <div id="espHost" aria-hidden="true"></div>
+            </div>
+            <div class="bar" id="barWrap" hidden><i id="bar"></i></div>
+
+            <div class="warn">
+              <span class="i" aria-hidden="true">!</span>
+              <div>
+                <p><strong data-i18n="warn_title">Cadre légal.</strong> <span data-i18n="warn_l1">Outil de test destiné à ton propre matériel et tes propres réseaux. Capturer des identifiants sur un réseau tiers est une infraction (art. 323-1 et suivants du Code pénal / CFAA).</span></p>
+                <p data-i18n="warn_l2">Le flash efface le firmware existant. Cable d'origine + port USB alimenté, pas de hub.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- console + feats + changelog -->
+      <div style="display:grid;gap:1.25rem">
+        <div class="panel">
+          <div class="term-h"><b data-i18n="console_title">sys/console</b><span class="lbl">tty0</span><span class="dots"><i></i><i></i><i></i></span></div>
+          <div class="log" id="log" role="log" aria-live="polite" aria-label="Journal"></div>
+        </div>
+
+        <div class="panel">
+          <h2><span>02 · <span class="idx" data-i18n="modules_title">modules</span></span><span class="lbl" data-i18n="modules_ver">firmware 2.0.0</span></h2>
+          <div class="p-body">
+            <ul class="feats">
+              <li data-i18n="feat1">Evil Twin amélioré</li><li data-i18n="feat2">Vol d'identifiants email/password</li><li data-i18n="feat3">Scan Wi-Fi temps réel</li>
+              <li data-i18n="feat4">Templates HTML custom upload</li><li data-i18n="feat5">Compteur credentials (50 slots)</li><li data-i18n="feat6">Admin Panel 192.168.4.1</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2><span>03 · <span class="idx" data-i18n="shortcuts_title">raccourcis</span></span><span class="lbl" data-i18n="shortcuts_key">clavier</span></h2>
+          <div class="p-body">
+            <div class="row" style="gap:.5rem">
+              <span class="lbl"><b style="color:var(--red)">1-4</b> <span data-i18n="sh_tabs">onglets</span></span>
+              <span class="lbl"><b style="color:var(--red)">E</b> <span data-i18n="sh_flash">flasher</span></span>
+              <span class="lbl"><b style="color:var(--red)">C</b> <span data-i18n="sh_copy">copier cmd</span></span>
+              <span class="lbl"><b style="color:var(--red)">L</b> <span data-i18n="sh_wipe">vider journal</span></span>
+            </div>
+            <hr class="hair">
+            <div class="row">
+              <button class="btn" id="btnWipe" type="button" data-i18n="btn_wipe">vider journal</button>
+              <button class="btn" id="btnSave" type="button" data-i18n="btn_save">exporter journal</button>
+              <span class="sp"></span>
+              <a class="btn prime" href="https://github.com/FoX-hxck/EvilFoX" target="_blank" rel="noopener noreferrer" data-i18n="btn_github">dépôt github</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 2 : CLI ============ -->
+  <section id="cli" role="tabpanel" aria-labelledby="t-cli" tabindex="-1" hidden>
+    <div class="cols">
+      <div class="panel cnr">
+        <h2><span>01 · <span class="idx" data-i18n="cli_title">esptool manuel</span></span><span class="lbl" id="cliTargetLbl">ESP32</span></h2>
+        <div class="p-body">
+          <ol class="steps">
+            <li><span class="st">step 01</span><b data-i18n="st1">Télécharger le firmware</b><p data-i18n="st1p">Le .bin combiné (bootloader + partitions + app), ou laisse le navigateur le faire via Web Flash.</p></li>
+            <li><span class="st">step 02</span><b data-i18n="st2">Installer esptool</b><p data-i18n="st2p"><code>pip install esptool</code> — ou <code>apt install esptool</code>. Source : github.com/espressif/esptool</p></li>
+            <li><span class="st">step 03</span><b data-i18n="st3">Donner l'accès au port</b><p data-i18n="st3p"><code>sudo usermod -aG dialout $USER</code> puis reconnexion. Sinon <code>sudo</code> devant la commande.</p></li>
+            <li><span class="st">step 04</span><b data-i18n="st4">Identifier le port</b><p data-i18n="st4p"><code>ls /dev/tty{USB,ACM}{0..9}</code> ou <code>dmesg | tail</code> après branchement.</p></li>
+            <li><span class="st">step 05</span><b data-i18n="st5">Flasher</b><p data-i18n="st5p">Copie la commande générée ci-dessous, garde le bouton <b>BOOT</b> enfoncé si le port n'est pas détecté.</p></li>
+          </ol>
+
+          <div class="row" style="justify-content:space-between">
+            <span class="lbl" data-i18n="serial_port">port série</span>
+            <div class="seg" id="ports" role="group" aria-label="Port série">
+              <button type="button" data-port="/dev/ttyUSB0" aria-pressed="true">/dev/ttyUSB0</button>
+              <button type="button" data-port="/dev/ttyACM0" aria-pressed="false">/dev/ttyACM0</button>
+              <button type="button" data-port="/dev/tty.usbserial-110" aria-pressed="false">macOS</button>
+              <button type="button" data-port="COM3" aria-pressed="false">windows</button>
+            </div>
+          </div>
+          <hr class="hair">
+          <div class="code">
+            <button class="copy" id="copyCmd" type="button" data-done="0" data-i18n="copy">copier</button>
+            <pre id="cmd"><span class="c"># erase then write combined image at 0x0</span>
+<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX1-0-2.bin</span></pre>
+          </div>
+          <div class="row" style="margin-top:.6rem">
+            <button class="btn" id="copyCmd2" type="button" data-i18n="copy_no">copier sans le $</button>
+            <span class="lbl" id="copyHint" data-i18n="copy_hint">le fichier .bin doit être dans le dossier courant</span>
+          </div>
+
+          <div class="dl" id="dlBtns"></div>
+
+          <div class="warn">
+            <span class="i" aria-hidden="true">!</span>
+            <div>
+              <p data-i18n="cli_warn1">Image "combined" : flash à l'offset <code>0x0</code> uniquement. Si tu passes par des fichiers séparés (<code>bootloader.bin</code>, <code>partitions.bin</code>, <code>app.bin</code>), utilise les offsets <code>0x1000</code> / <code>0x8000</code> / <code>0x10000</code>.</p>
+              <p data-i18n="cli_warn2">Un <code>-z 0x0</code> (déflate) ne fonctionne qu'avec une image compressée ; ici on écrit le binaire brut, plus fiable.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="term-h"><b data-i18n="checklist_t">checklist</b><span class="lbl" data-i18n="checklist_s">avant de flasher</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="p-body">
+          <ul class="feats" style="grid-template-columns:1fr">
+            <li data-i18n="cl1">Câble data (pas un cable de charge seul)</li>
+            <li data-i18n="cl2">Pas de hub USB non alimenté</li>
+            <li data-i18n="cl3">Driver CP210x / CH340 installé si pas de /dev/ttyUSBx</li>
+            <li data-i18n="cl4">GitHub ouvert en HTTPS, sinon l'API Serial est bloquée</li>
+            <li data-i18n="cl5">Batteries M5 retirées pendant l'écriture</li>
+            <li data-i18n="cl6">Backup du firmware d'origine si besoin</li>
+          </ul>
+          <hr class="hair">
+          <p class="lbl" data-i18n="note_l">note</p>
+          <p style="font-size:11.5px;color:var(--fg2);margin-top:.35rem" data-i18n="note_p">Web Flash (1er onglet) et CLI font la même chose : le navigateur parle directement à l'ESP via Web Serial. Aucun serveur intermédiaire, rien n'est téléversé.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 3 : DIAGNOSTIC ============ -->
+  <section id="diag" role="tabpanel" aria-labelledby="t-diag" tabindex="-1" hidden>
+    <div class="cols">
+      <div class="panel cnr">
+        <h2><span>01 · <span class="idx" data-i18n="diag_env">environnement</span></span><span class="lbl" id="diagScan">scan…</span></h2>
+        <div class="p-body">
+          <ul class="diag" id="diagList"></ul>
+          <hr class="hair">
+          <div class="row">
+            <button class="btn" id="btnRecheck" type="button" data-i18n="diag_rescan">relancer le scan</button>
+            <button class="btn" id="btnDmesg" type="button" data-i18n="diag_dmesg">copier la cmd de log</button>
+            <span class="lbl sp" id="diagHint" data-i18n="diag_hint">les blocages viennent de 90% d'un contexte non-sécurisé ou d'un hub USB</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2><span>02 · <span class="idx" data-i18n="faq_t">dépannage</span></span><span class="lbl">faq</span></h2>
+        <div>
+          <details open>
+            <summary data-i18n="faq1_s">Le bouton du navigateur reste gris / "no port chosen"</summary>
+            <div class="in" data-i18n="faq1_b">Chrome, Edge ou Opera de bureau (Web Serial n'existe pas sur Firefox/Safari/Android). Ouvre la page en <code>https://</code> ou <code>http://localhost</code>. GitHub Pages : vérifie "Enforce HTTPS".</div>
+          </details>
+          <details>
+            <summary data-i18n="faq2_s">"Failed to connect to ESP32: No serial data received"</summary>
+            <div class="in" data-i18n="faq2_b">Maintiens <code>BOOT/GPIO0</code> (ESP32) ou le bouton <b>G0</b> (M5) enfoncé jusqu'à ce que le handshake démarre, puis relâche. Essaie un autre port à <code>115200</code> en retirant <code>-b 460800</code>.</div>
+          </details>
+          <details>
+            <summary data-i18n="faq3_s">"Could not open COM3, the port is busy"</summary>
+            <div class="in" data-i18n="faq3_b">Ferme ESPHome / Arduino IDE / PuTTY / moniteur série, puis débranche-rebranche. Sous Linux : vérifie <code>dialout</code> ou <code>uucp</code> dans <code>groups</code>.</div>
+          </details>
+          <details>
+            <summary data-i18n="faq4_s">Le M5 reste noir après le flash</summary>
+            <div class="in" data-i18n="faq4_b">Éteins-le (appui long PWR), rallume, et vérifie que tu as flashé le build <b>M5</b> et non le build ESP32 : le Pin Mapping (écran 1.14", A/B/C) est différent.</div>
+          </details>
+          <details>
+            <summary data-i18n="faq5_s">Revenir au firmware d'usine</summary>
+            <div class="in" data-i18n="faq5_b">Re-flashe une image ESPHome/Home Assistant ou la dernière release EvilFoX avec la même commande, offset <code>0x0</code> pour une image combinée.</div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 4 : CHANGELOG ============ -->
+  <section id="doc" role="tabpanel" aria-labelledby="t-doc" tabindex="-1" hidden>
+    <div class="cols">
+      <div class="panel cnr">
+        <h2><span>01 · <span class="idx" data-i18n="tab_doc">notes de version</span></span><span class="lbl">2.0.0</span></h2>
+        <ul class="log-list" id="changelog">
+          <li><time>2026-09-10</time><p><span class="v">2.0.0</span> <strong>Admin UI Update</strong></p></li>
+          <li><time>2026-09-10</time><p><span class="v">2.0.0</span> Refonte complète de l'interface Admin + architecture centralisée</p></li>
+          <li><time>2026-09-10</time><p><span class="v">2.0.0</span> Nouveau thème DedSec : néon violet, glitch &amp; scanlines</p></li>
+          <li><time>2026-09-10</time><p><span class="v">2.0.0</span> Responsive mobile : sidebar drawer, tables scrollables, contrôles adaptés</p></li>
+          <li><time>2026-09-10</time><p><span class="v">2.0.0</span> Page Credentials améliorée : auto-refresh 10s, export CSV &amp; purge</p></li>
+          <li><time>2026-09-10</time><p><span class="v">2.0.0</span> .ino optimisé : 2715 → ~928 lignes</p></li>
+          <li><time>2025-09-09</time><p><span class="v">2.0.0</span> Evil Twin amélioré + Admin Panel complète</p></li>
+          <li><time>2025-09-09</time><p><span class="v">2.0.0</span> Upload de templates HTML custom via le panneau admin</p></li>
+          <li><time>2025-09-09</time><p><span class="v">2.0.0</span> Scan Wi-Fi temps réel avec sélection de réseau cible</p></li>
+          <li><time>2025-09-08</time><p><span class="v">1.0.2</span> Ajout de l'animation <strong>PWNED!</strong> pour le M5</p></li>
+          <li><time>2025-09-08</time><p><span class="v">1.0.2</span> Animations <strong>ON / OFF</strong> pour le M5</p></li>
+          <li><time>2025-09-07</time><p><span class="v">1.0.2</span> Compteur de credentials sur l'écran du M5</p></li>
+          <li><time>2025-07-30</time><p><span class="v">1.0.1</span> Renommage des SSID d'administration</p></li>
+          <li><time>2025-07-30</time><p><span class="v">1.0.1</span> 2 nouveaux templates : <strong>Basic Fit</strong> / <strong>Login Google</strong></p></li>
+          <li><time>2025-07-29</time><p><span class="v">1.0.0</span> Fonctionnalité <strong>Evil Twin</strong> améliorée</p></li>
+          <li><time>2025-07-29</time><p><span class="v">1.0.0</span> Import d'une page HTML custom</p></li>
+          <li><time>2025-07-29</time><p><span class="v">1.0.0</span> Première version stable du firmware</p></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2><span>02 · <span class="idx" data-i18n="files_t">fichiers attendus à la racine</span></span><span class="lbl">github pages</span></h2>
+        <div class="p-body">
+          <div class="code"><pre id="tree"></pre></div>
+          <hr class="hair">
+          <p style="font-size:11.5px;color:var(--fg2)" data-i18n="files_p">Le manifeste est <strong>généré à la volée</strong> par la page (Blob URL) : pas besoin de créer <code>manifest-*.json</code> si les <code>.bin</code> sont à côté de l'<code>index.html</code>. Le mode <em>fichier</em> reste actif si tu préfères les versions statiques — l'appli bascule automatiquement si le Blob est refusé.</p>
+          <hr class="hair">
+          <div class="row"><button class="btn" id="copyTree" type="button" data-i18n="copy_tree">copier l'arborescence</button><span class="lbl sp" id="modeLbl">manifeste : blob</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span data-i18n="footer_t">EVILFOX PROJECT · 2025 · firmware sécurisé, droits respectés</span>
+    <span class="lg">« STAY HOME, STAY SAFE, STAY HUNGRY »</span>
+    <span id="perf">—</span>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   EVILFOX loader — un seul module, aucun framework
+   Principes : délégation d'événements, zette poll d'état (remplacé
+   par les évènements esp-web-tools), animations en transform/opacity,
+   canvas plafonné et coupé si on réduit les animations.
+   ============================================================ */
+(function(){
+"use strict";
+var D=document,W=window,root=D.documentElement;
+var $=function(s,c){return (c||D).querySelector(s)};
+var $$=function(s,c){return Array.prototype.slice.call((c||D).querySelectorAll(s))};
+var reduced=W.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- journal ---------- */
+var LOG=$('#log'),LOGMAX=200,buf=[];
+function stamp(){var d=new Date(),p=function(n){return(n<10?"0":"")+n};return p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds())}
+function log(msg,sev){
+  sev=sev||"in";
+  buf.push("["+stamp()+"] "+sev.toUpperCase()+" "+msg);
+  if(!LOG)return;
+  var line=D.createElement("p");
+  var t=D.createElement("span");t.className="t";t.textContent=stamp();
+  var s=D.createElement("span");s.className="s "+sev;s.textContent=sev==="in"?"[>>]":sev==="ok"?"[ok]":sev==="wr"?"[!!]":sev==="er"?"[xx]":"[>>]";
+  var m=D.createElement("span");m.textContent=msg;
+  line.append(t,s,m);
+  while(LOG.childElementCount>LOGMAX)LOG.removeChild(LOG.firstElementChild);
+  LOG.appendChild(line);
+  LOG.scrollTop=LOG.scrollHeight;
+}
+W.__foxlog=log;
+
+/* ---------- configuration ---------- */
+var VER="2.0.0";
+var USE_FILE_MANIFEST=false;            /* true => always utiliser manifest-*.json */
+var devices={};
+$$("#devices .dev").forEach(function(b){
+  devices[b.dataset.key]={
+    name:b.dataset.name, chip:b.dataset.chip, offset:+b.dataset.off,
+    bin:b.dataset.bin, manifest:b.dataset.manifest, dl:b.dataset.dl, btn:b,
+    parts:[{path:b.dataset.bin,offset:+b.dataset.off}]
+  };
+});
+var current=null, blobUrl=null;
+
+/* ---------- etat global + UI ---------- */
+var cta=$('#ctaBtn'),ctaTxt=$('#ctaTxt'),ledDev=$('#ledDev'),targetLbl=$('#targetLbl'),barWrap=$('#barWrap'),bar=$('#bar');
+function setCta(txt,state){ctaTxt.textContent=txt;cta.dataset.state=state||"idle"}
+function save(k,v){try{localStorage.setItem("fox:"+k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem("fox:"+k)}catch(e){return null}}
+
+/* ---------- i18n FR/EN ---------- */
+var LANG=load("lang")||"fr";
+var I18N={
+fr:{
+  secure_ctx:"contexte sécurisé",
+  tag_loader:"firmware loader",
+  hero_sub:"EvilFox v2.0.0 — Evil Twin amélioré, vol d'identifiants, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code> / <code>FoXhack_Evil</code>. Usage éducatif, sur ton réseau uniquement.",
+  tab_web:"web flash", tab_cli:"cli · linux / macos", tab_diag:"diagnostic", tab_doc:"notes de version",
+  target_panel:"cible", no_target:"aucune cible",
+  dev_esp32_d:"Devboard standard · 38 pins", dev_m5_d:"Stick 1.14\" · PWR2 / G0 / G10", chip_combined:"combined image · 0x0",
+  kv_target:"cible", kv_chip:"chip family", kv_bin:"binaire", kv_manifest:"manifest",
+  cta_waiting:"en attente de cible", cta_select:"Sélectionne un appareil",
+  cta_flash:"Flasher {0}", cta_flashing:"Flash en cours — ne pas débrancher", cta_done:"Flash terminé ✓", cta_error:"Erreur — réessayer", cta_select_target:"Sélectionne un appareil !", cta_port:"Ouverture du sélecteur de port…", cta_noweb:"Web flash indisponible — onglet CLI",
+  warn_title:"Cadre légal.", warn_l1:"Outil de test destiné à ton propre matériel et tes propres réseaux. Capturer des identifiants sur un réseau tiers est une infraction (art. 323-1 et suivants du Code pénal / CFAA).", warn_l2:"Le flash efface le firmware existant. Cable d\'origine + port USB alimenté, pas de hub.",
+  console_title:"sys/console",
+  modules_title:"modules", modules_ver:"firmware 2.0.0",
+  feat1:"Evil Twin amélioré", feat2:"Vol d'identifiants email/password", feat3:"Scan Wi-Fi temps réel", feat4:"Templates HTML custom upload", feat5:"Compteur credentials (50 slots)", feat6:"Admin Panel 192.168.4.1",
+  shortcuts_title:"raccourcis", shortcuts_key:"clavier",
+  sh_tabs:"onglets", sh_flash:"flasher", sh_copy:"copier cmd", sh_wipe:"vider journal",
+  btn_wipe:"vider journal", btn_save:"exporter journal", btn_github:"dépôt github",
+  cli_title:"esptool manuel",
+  st1:"Télécharger le firmware", st1p:"Le .bin combiné (bootloader + partitions + app), ou laisse le navigateur le faire via Web Flash.",
+  st2:"Installer esptool", st2p:"<code>pip install esptool</code> — ou <code>apt install esptool</code>. Source : github.com/espressif/esptool",
+  st3:"Donner l\'accès au port", st3p:"<code>sudo usermod -aG dialout $USER</code> puis reconnexion. Sinon <code>sudo</code> devant la commande.",
+  st4:"Identifier le port", st4p:"<code>ls /dev/tty{USB,ACM}{0..9}</code> ou <code>dmesg | tail</code> après branchement.",
+  st5:"Flasher", st5p:"Copie la commande générée ci-dessous, garde le bouton <b>BOOT</b> enfoncé si le port n'est pas détecté.",
+  serial_port:"port série", copy:"copier", copy_no:"copier sans le $", copy_hint:"le fichier .bin doit être dans le dossier courant",
+  cli_warn1:"Image \"combined\" : flash à l'offset <code>0x0</code> uniquement. Si tu passes par des fichiers séparés (<code>bootloader.bin</code>, <code>partitions.bin</code>, <code>app.bin</code>), utilise les offsets <code>0x1000</code> / <code>0x8000</code> / <code>0x10000</code>.",
+  cli_warn2:"Un <code>-z 0x0</code> (déflate) ne fonctionne qu'avec une image compressée ; ici on écrit le binaire brut, plus fiable.",
+  checklist_t:"checklist", checklist_s:"avant de flasher",
+  cl1:"Câble data (pas un cable de charge seul)", cl2:"Pas de hub USB non alimenté", cl3:"Driver CP210x / CH340 installé si pas de /dev/ttyUSBx", cl4:"GitHub ouvert en HTTPS, sinon l\'API Serial est bloquée", cl5:"Batteries M5 retirées pendant l\'écriture", cl6:"Backup du firmware d\'origine si besoin",
+  note_l:"note", note_p:"Web Flash (1er onglet) et CLI font la même chose : le navigateur parle directement à l\'ESP via Web Serial. Aucun serveur intermédiaire, rien n\'est téléversé.",
+  diag_env:"environnement", diag_rescan:"relancer le scan", diag_dmesg:"copier la cmd de log", diag_hint:"les blocages viennent de 90% d\'un contexte non-sécurisé ou d\'un hub USB", faq_t:"dépannage",
+  faq1_s:"Le bouton du navigateur reste gris / \"no port chosen\"", faq1_b:"Chrome, Edge ou Opera de bureau (Web Serial n\'existe pas sur Firefox/Safari/Android). Ouvre la page en <code>https://</code> ou <code>http://localhost</code>. GitHub Pages : vérifie \"Enforce HTTPS\".",
+  faq2_s:"\"Failed to connect to ESP32: No serial data received\"", faq2_b:"Maintiens <code>BOOT/GPIO0</code> (ESP32) ou le bouton <b>G0</b> (M5) enfoncé jusqu'à ce que le handshake démarre, puis relâche. Essaie un autre port à <code>115200</code> en retirant <code>-b 460800</code>.",
+  faq3_s:"\"Could not open COM3, the port is busy\"", faq3_b:"Ferme ESPHome / Arduino IDE / PuTTY / moniteur série, puis débranche-rebranche. Sous Linux : vérifie <code>dialout</code> ou <code>uucp</code> dans <code>groups</code>.",
+  faq4_s:"Le M5 reste noir après le flash", faq4_b:"Éteins-le (appui long PWR), rallume, et vérifie que tu as flashé le build <b>M5</b> et non le build ESP32 : le Pin Mapping (écran 1.14\", A/B/C) est différent.",
+  faq5_s:"Revenir au firmware d'usine", faq5_b:"Re-flashe une image ESPHome/Home Assistant ou la dernière release EvilFoX avec la même commande, offset <code>0x0</code> pour une image combinée.",
+  files_t:"fichiers attendus à la racine", files_p:"Le manifeste est <strong>généré à la volée</strong> par la page (Blob URL) : pas besoin de créer <code>manifest-*.json</code> si les <code>.bin</code> sont à côté de l\'<code>index.html</code>. Le mode <em>fichier</em> reste actif si tu préfères les versions statiques — l\'appli bascule automatiquement si le Blob est refusé.",
+  copy_tree:"copier l\'arborescence",
+  tree_root:"# racine du dépôt (GitHub Pages)", tree_page:"← cette page", tree_esp32:"← ESP32 (combined)", tree_m5:"← M5StickC Plus2", tree_opt:"optionnel (blob par défaut)", tree_opt2:"optionnel", tree_img:"requis (images des appareils)",
+  mode_blob:"manifeste : blob", mode_gen:"manifeste : blob (0 fichier requis)", mode_file:"manifeste : fichier statique",
+  diag_ws:"Web Serial API", diag_ws_present:"présente", diag_ws_absent:"absente", diag_sec:"contexte sécurisé", diag_sec_ok:"https / localhost", diag_sec_no:"http — bloqué", diag_host:"hôte", diag_host_ok:"fichier local", diag_browser:"navigateur", diag_ua:"user agent mobile", diag_ua_mobile:"oui — Web Serial non supporté", diag_ua_no:"non", diag_rm:"réduis les animations", diag_rm_on:"activé", diag_rm_off:"désactivé", diag_cores:"cœurs logiques", diag_mem:"deviceMemory", diag_esptool:"esptool (CLI)", diag_cmd:"commande générée", diag_fw:"firmware ciblé", ws_watch:"bootloader prêt — Web Serial API : {0}",
+  diag_scanned:"scanné {0}",
+  log_module:"module Web Tools chargé", log_flash:"écriture du flash en cours…", log_done:"flash terminé, appareil prêt", log_error:"erreur : {0}", log_no_target:"aucune cible : sélectionne un appareil d\'abord", log_noweb:"Web Serial indisponible → onglet CLI", log_port_open:"sélecteur de port ouvert (shadow)", log_port_fb:"fallback : évènement click sur le host", log_boot:"boot", log_ctx:"contexte {0}", log_ctx_ok:"sécurisé ✓", log_ctx_no:"NON sécurisé — Web Serial bloqué ✗", log_module_load:"chargement du module esp-web-tools…", log_deleg:"delegations : devices / ports / tabs ✓", log_restore:"preference persistante restaurée", log_ready:"pret. branche l\'ESP et choisi une cible.",
+  log_noser:"port série accessible", log_lock:"cible verrouillée : {0}",
+  github:"dépôt github", backup:"télécharger (CLI)",
+  act_scan:"scan d'environnement…", clip:"presse-papiers mis à jour", copy_done:"copié ✓", copy_done_s:"copié", port_sel:"port série → {0}", blob_gen:"blob://généré", dev_title:"raccourci : {0} puis E",
+  log_wiped:"journal vidé", log_export:"journal exporté", blob_rejected:"blob refusé → fichier {0}", device_info:"device: {0} · {1} · {2}", manifest_loaded:"manifest chargé",
+  lang_now:"interface en français", cli_fb:"module Web Tools indisponible (CDN hors-ligne ?) → passe par l'onglet CLI",
+  sc_err:"CDN unpkg injoignable — mode CLI conseillé",
+  footer_t:"EVILFOX PROJECT · 2025 · firmware sécurisé, droits respectés"
+},
+en:{
+  secure_ctx:"secure context",
+  tag_loader:"firmware loader",
+  hero_sub:"EvilFox v2.0.0 — improved Evil Twin, credential harvesting, Wi-Fi scanning, custom HTML templates. Admin: <code>192.168.4.1</code> / WiFi: <code>FoXhack</code> / <code>FoXhack_Evil</code>. For educational use on your own network only.",
+  tab_web:"web flash", tab_cli:"cli · linux / macos", tab_diag:"diagnostics", tab_doc:"release notes",
+  target_panel:"target", no_target:"no target",
+  dev_esp32_d:"Standard devboard · 38 pins", dev_m5_d:"Stick 1.14\" · PWR2 / G0 / G10", chip_combined:"combined image · 0x0",
+  kv_target:"target", kv_chip:"chip family", kv_bin:"binary", kv_manifest:"manifest",
+  cta_waiting:"waiting for target", cta_select:"Select a device",
+  cta_flash:"Flash {0}", cta_flashing:"Flashing — do not unplug", cta_done:"Flash complete ✓", cta_error:"Error — retry", cta_select_target:"Select a device first!", cta_port:"Opening port picker…", cta_noweb:"Web flash unavailable — CLI tab",
+  warn_title:"Legal notice.", warn_l1:"Testing tool intended for your own hardware and networks. Capturing credentials on a third-party network is an offense (art. 323-1 ff. of the French Penal Code / CFAA).", warn_l2:"Flashing erases the existing firmware. Use the original cable + powered USB port, no hub.",
+  console_title:"sys/console",
+  modules_title:"modules", modules_ver:"firmware 2.0.0",
+  feat1:"Improved Evil Twin", feat2:"Email/password harvesting", feat3:"Real-time Wi-Fi scan", feat4:"Custom HTML template upload", feat5:"Credential counter (50 slots)", feat6:"Admin Panel 192.168.4.1",
+  shortcuts_title:"shortcuts", shortcuts_key:"keyboard",
+  sh_tabs:"tabs", sh_flash:"flash", sh_copy:"copy cmd", sh_wipe:"clear log",
+  btn_wipe:"clear log", btn_save:"export log", btn_github:"github repo",
+  cli_title:"manual esptool",
+  st1:"Download the firmware", st1p:"The combined .bin (bootloader + partitions + app), or let the browser handle it via Web Flash.",
+  st2:"Install esptool", st2p:"<code>pip install esptool</code> — or <code>apt install esptool</code>. Source: github.com/espressif/esptool",
+  st3:"Give access to the port", st3p:"<code>sudo usermod -aG dialout $USER</code> then log out/in. Otherwise prefix <code>sudo</code> to the command.",
+  st4:"Identify the port", st4p:"<code>ls /dev/tty{USB,ACM}{0..9}</code> or <code>dmesg | tail</code> after plugging in.",
+  st5:"Flash", st5p:"Copy the generated command below; hold down the <b>BOOT</b> button if the port is not detected.",
+  serial_port:"serial port", copy:"copy", copy_no:"copy without $", copy_hint:"the .bin file must be in the current folder",
+  cli_warn1:"Combined image: flash only at offset <code>0x0</code>. If using separate files (<code>bootloader.bin</code>, <code>partitions.bin</code>, <code>app.bin</code>), use offsets <code>0x1000</code> / <code>0x8000</code> / <code>0x10000</code>.",
+  cli_warn2:"A <code>-z 0x0</code> (deflate) only works with a compressed image; here we write the raw binary, more reliable.",
+  checklist_t:"checklist", checklist_s:"before flashing",
+  cl1:"Data cable (not charge-only)", cl2:"No unpowered USB hub", cl3:"CP210x / CH340 driver installed if no /dev/ttyUSBx", cl4:"GitHub opened over HTTPS, otherwise the Serial API is blocked", cl5:"M5 batteries removed during write", cl6:"Backup the original firmware if needed",
+  note_l:"note", note_p:"Web Flash (1st tab) and CLI do the same thing: the browser talks directly to the ESP via Web Serial. No intermediate server, nothing is uploaded.",
+  diag_env:"environment", diag_rescan:"re-run the scan", diag_dmesg:"copy the log command", diag_hint:"90% of issues come from a non-secure context or a USB hub", faq_t:"troubleshooting",
+  faq1_s:"The browser button stays grey / \"no port chosen\"", faq1_b:"Desktop Chrome, Edge or Opera (Web Serial doesn\'t exist on Firefox/Safari/Android). Open the page over <code>https://</code> or <code>http://localhost</code>. GitHub Pages: check \"Enforce HTTPS\".",
+  faq2_s:"\"Failed to connect to ESP32: No serial data received\"", faq2_b:"Hold <code>BOOT/GPIO0</code> (ESP32) or the <b>G0</b> button (M5) until the handshake starts, then release. Try another port at <code>115200</code> by removing <code>-b 460800</code>.",
+  faq3_s:"\"Could not open COM3, the port is busy\"", faq3_b:"Close ESPHome / Arduino IDE / PuTTY / serial monitor, then unplug and replug. On Linux: check <code>dialout</code> or <code>uucp</code> in <code>groups</code>.",
+  faq4_s:"The M5 stays black after flashing", faq4_b:"Power it off (long press PWR), power on again, and make sure you flashed the <b>M5</b> build and not the ESP32 one: the Pin Mapping (1.14\" screen, A/B/C) is different.",
+  faq5_s:"Revert to factory firmware", faq5_b:"Re-flash an ESPHome/Home Assistant image or the latest EvilFoX release with the same command, offset <code>0x0</code> for a combined image.",
+  files_t:"expected files at root", files_p:"The manifest is <strong>generated on the fly</strong> by the page (Blob URL): no need to create <code>manifest-*.json</code> if the <code>.bin</code> files sit next to <code>index.html</code>. <em>File</em> mode stays active if you prefer static versions — the app switches automatically if the Blob is refused.",
+  copy_tree:"copy the tree",
+  tree_root:"# repository root (GitHub Pages)", tree_page:"← this page", tree_esp32:"← ESP32 (combined)", tree_m5:"← M5StickC Plus2", tree_opt:"optional (blob by default)", tree_opt2:"optional", tree_img:"required (device images)",
+  mode_blob:"manifest: blob", mode_gen:"manifest: blob (0 file required)", mode_file:"manifest: static file",
+  diag_ws:"Web Serial API", diag_ws_present:"present", diag_ws_absent:"absent", diag_sec:"secure context", diag_sec_ok:"https / localhost", diag_sec_no:"http — blocked", diag_host:"host", diag_host_ok:"local file", diag_browser:"browser", diag_ua:"mobile user agent", diag_ua_mobile:"yes — Web Serial unsupported", diag_ua_no:"no", diag_rm:"reduce motion", diag_rm_on:"enabled", diag_rm_off:"disabled", diag_cores:"logical cores", diag_mem:"deviceMemory", diag_esptool:"esptool (CLI)", diag_cmd:"generated command", diag_fw:"target firmware", ws_watch:"bootloader ready — Web Serial API: {0}",
+  diag_scanned:"scanned {0}",
+  log_module:"Web Tools module loaded", log_flash:"flashing in progress…", log_done:"flash complete, device ready", log_error:"error: {0}", log_no_target:"no target: select a device first", log_noweb:"Web Serial unavailable → CLI tab", log_port_open:"port picker opened (shadow)", log_port_fb:"fallback: click event on the host", log_boot:"boot", log_ctx:"secure context {0}", log_ctx_ok:"secure ✓", log_ctx_no:"NOT secure — Web Serial blocked ✗", log_module_load:"loading esp-web-tools module…", log_deleg:"delegations: devices / ports / tabs ✓", log_restore:"stored preference restored", log_ready:"ready. plug in the ESP and pick a target.",
+  log_noser:"serial port accessible", log_lock:"target locked: {0}",
+  github:"github repo", backup:"download (CLI)",
+  act_scan:"environment scan…", clip:"clipboard updated", copy_done:"copied ✓", copy_done_s:"copied", port_sel:"serial port → {0}", blob_gen:"blob://generated", dev_title:"shortcut: {0} then E",
+  log_wiped:"log cleared", log_export:"log exported", blob_rejected:"blob refused → file {0}", device_info:"device: {0} · {1} · {2}", manifest_loaded:"manifest loaded",
+  lang_now:"interface switched to english", cli_fb:"Web Tools module unavailable (CDN offline?) → use the CLI tab",
+  sc_err:"CDN unpkg unreachable — CLI mode recommended",
+  footer_t:"EVILFOX PROJECT · 2025 · secure firmware, all rights respected"
+}
+};
+function t(k){if(I18N[LANG]&&I18N[LANG][k]!=null)return I18N[LANG][k];return I18N.fr[k]}
+function tfmt(k,a){var s=t(k);for(var i=0;i<a.length;i++)s=s.split("{"+i+"}").join(a[i]);return s}
+function applyLang(){
+  $$("[data-i18n]").forEach(function(el){
+    var k=el.getAttribute("data-i18n");
+    if(I18N[LANG]&&I18N[LANG][k]!=null)el.innerHTML=I18N[LANG][k];
+  });
+  $('#langBtn').innerHTML=LANG==="fr"?"<b>FR</b> / EN":"FR / <b>EN</b>";
+  /* re-traduit les zones générées dynamiquement */
+  if(current)pickDevice(current,true);
+  modeLblUpdate();
+  renderTree();
+  runDiag();
+  devTitles();
+}
+
+function manifestFor(d){
+  return JSON.stringify({
+    name:"EvilFoX · "+d.name,
+    version:VER,
+    new_install_skip_erase:false,
+    builds:[{chipFamily:d.chip,parts:d.parts}]
+  },null,2);
+}
+function pickDevice(key,skip){
+  var d=devices[key];if(!d)return;
+  current=key;
+  for(var k in devices){devices[k].btn.setAttribute("aria-pressed",String(k===key))}
+  $('#kvName').textContent=d.name;
+  $('#kvChip').textContent=d.chip;
+  $('#kvBin').textContent=d.bin;
+  $('#kvManifest').textContent=USE_FILE_MANIFEST?d.manifest:t("blob_gen");
+  $('#kvManifest').classList.toggle("on",!USE_FILE_MANIFEST);
+  targetLbl.textContent=d.name.toLowerCase();
+  ledDev.className="led ok";
+  cta.disabled=false;
+  setCta(tfmt("cta_flash",[d.name]),"idle");
+  $('#cliTargetLbl').textContent=d.name;
+  $('#cmdChip').textContent=d.chip.toLowerCase();
+  $('#cmdBin').textContent=d.bin;
+  renderDl();
+  /* manifeste : blob si dispo, sinon fichier statique */
+  if(!USE_FILE_MANIFEST&&W.URL&&URL.createObjectURL){
+    try{
+      if(blobUrl)URL.revokeObjectURL(blobUrl);
+      blobUrl=URL.createObjectURL(new Blob([manifestFor(d)],{type:"application/json"}));
+      host.setAttribute("id","espHost");
+      setManifest(blobUrl);
+      $('#modeLbl').textContent=t("mode_gen");
+    }catch(e){setManifest(d.manifest);USE_FILE_MANIFEST=true;$('#modeLbl').textContent=t("mode_file");log(tfmt("blob_rejected",[d.manifest]),"wr")}
+  }else{setManifest(d.manifest)}
+  save("device",key);
+  if(!skip)log(tfmt("log_lock",[d.name+" ("+d.bin+", +0x"+d.offset.toString(16)+")"]),"rn");
+}
+function renderDl(){
+  var html="",k;
+  for(k in devices){
+    var d=devices[k];
+    html+='<a href="'+d.dl+'" target="_blank" rel="noopener noreferrer" download="'+d.bin+'"><span class="ar">↓</span><span><strong>'+d.bin+'</strong><span class="t2">'+d.name+' · '+t("backup")+(current===k?' · '+t("kv_target"):'')+'</span></span></a>';
+  }
+  $('#dlBtns').innerHTML=html;
+}
+
+/* ---------- esp-web-tools : bootloader caché, évènements uniquement ---------- */
+var host=null,ready=false;
+function setManifest(m){if(host)host.setAttribute("manifest",m||"")}
+function initEsp(){
+  var el=D.createElement("esp-web-install-button");
+  el.setAttribute("manifest","");
+  var box=$('#espHost');box.appendChild(el);host=el;
+  ready=true;
+  el.addEventListener("initializing",function(){log(t("log_module"),"ok")});
+  var inner=el.shadowRoot&&el.shadowRoot.querySelector("button");
+  if(inner&&!inner.disabled){log(t("log_noser"),"ok")}
+  ["installation-start","device-info","manifest-loading","connected","success","error"].forEach(function(ev){
+    el.addEventListener(ev,function(e){
+      var det=e.detail||{},msg=det.message||det.name||"";
+      if(ev==="device-info"){log(tfmt("device_info",[det.manifestName||"","mac "+(det.macAddress||"?"),det.board&&det.board.name||""]),"in")}
+      else if(ev==="manifest-loading"){log(t("manifest_loaded"),"in")}
+      else if(ev==="installation-start"){log(t("log_flash"),"rn");setCta(t("cta_flashing"),"busy");barWrap.hidden=false;bar.style.right="100%"}
+      else if(ev==="success"){log(t("log_done"),"ok");setCta(t("cta_done"),"ok");bar.style.right="0%";
+        setTimeout(function(){if(current)setCta(tfmt("cta_flash",[devices[current].name]),"idle");else setCta(t("cta_select"),"idle");barWrap.hidden=true},4500)}
+      else if(ev==="error"){log(tfmt("log_error",[msg||"Unknown"]),"er");setCta(t("cta_error"),"err");
+        setTimeout(function(){if(current)setCta(tfmt("cta_flash",[devices[current].name]),"idle");setCtaIfBusy()},3500)}
+    });
+  });
+}
+function setCtaIfBusy(){/* garde-fou : on ne laisse jamais l'état busy collé */
+  if(cta.dataset.state==="busy"&&current){setTimeout(function(){if(cta.dataset.state==="busy")setCta(tfmt("cta_flash",[devices[current].name]),"idle")},8000)}
+}
+function fire(){
+  if(!current){
+    log(t("log_no_target"),"wr");
+    setCta(t("cta_select_target"),"err");
+    setTimeout(function(){setCta(t("cta_select"),"idle");},1800);
+    return;
+  }
+  if(!navigator.serial){log(t("log_noweb"),"er");showTab("cli");return}
+  setCta(t("cta_port"),"busy");
+  var inner=host&&host.shadowRoot&&host.shadowRoot.querySelector("button");
+  if(inner&&!inner.disabled){inner.click();log(t("log_port_open"),"in")}
+  else if(host){host.dispatchEvent(new MouseEvent("click",{bubbles:true}));log(t("log_port_fb"),"in")}
+}
+function watchdog(){
+  log(tfmt("ws_watch",[navigator.serial?t("diag_ws_present"):t("diag_ws_absent")]),navigator.serial?"ok":"er");
+}
+
+/* ---------- onglets ---------- */
+var tabs=$$(".tab"),panels={"t-web":"console","t-cli":"cli","t-diag":"diag","t-doc":"doc"};
+function showTab(key){
+  var id=null;
+  tabs.forEach(function(t){var on=t.id==="t-"+key;t.setAttribute("aria-selected",String(on));if(on)id=panels[t.id]});
+  for(var k in panels){D.getElementById(panels[k]).hidden=(panels[k]!==id)}
+  if(key==="diag")runDiag();
+  save("tab",key);
+  if(W.location.hash.slice(1)!==key)try{history.replaceState(null,"","#"+key)}catch(e){}
+}
+tabs.forEach(function(t){t.addEventListener("click",function(){showTab(t.id.slice(2))})});
+
+/* ---------- pluie hexadecimale (canvas unique, plafonné) ---------- */
+function rain(){
+  if(reduced)return;
+  var cv=$('#rain'),cx=cv.getContext("2d",{alpha:false});
+  var size=13,cols=0,y=[],dpr=Math.min(W.devicePixelRatio||1,1);
+  var glyphs="0123456789ABCDEF·/\\|=+*<>";
+  function fit(){cv.width=cv.width|0;var w=Math.max(1,Math.floor(cv.clientWidth/size)),h=cv.clientHeight;
+    if(w!==cols){cols=w;cv.width=cv.clientWidth;cv.height=h;cx.fillStyle="#050506";cx.fillRect(0,0,cv.width,cv.height);y=new Array(cols);for(var i=0;i<cols;i++)y[i]=Math.random()*-40}}
+  fit();
+  var last=0,acc=0,vis=true;
+  D.addEventListener("visibilitychange",function(){vis=!D.hidden});
+  W.addEventListener("resize",fit,{passive:true});
+  function frame(ts){
+    requestAnimationFrame(frame);
+    if(!vis||ts-last<45)return;            /* ~22 fps max */
+    last=ts;
+    var h=cv.height;
+    cx.fillStyle="rgba(5,5,6,0.14)";cx.fillRect(0,0,cv.width,h);
+    cx.font=size+"px monospace";
+    for(var i=0;i<cols;i++){
+      var ch=glyphs[(Math.random()*glyphs.length)|0];
+      var yy=y[i]*size;
+      cx.fillStyle=(yy<h&&Math.random()>.985)?"#9D4EDD":"#2a2f36";
+      cx.fillText(ch,i*size,yy);
+      if(yy>h&&Math.random()>.975)y[i]=0;else y[i]++;
+    }
+    if(++acc%600===0)cx.fillRect(0,0,0,0);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- diagnostic ---------- */
+function row(name,val,cls){return "<li><span>"+name+"</span><span class='r "+(cls||"")+"'>"+val+"</span></li>"}
+function runDiag(){
+  var s=navigator.serial?"ok":"no";
+  var secure=window.isSecureContext?"ok":"no";
+  var mem=(navigator.deviceMemory||"?")+" Go", cores=navigator.hardwareConcurrency||"?";
+  var hostLoc=D.location.hostname;
+  var ua=navigator.userAgent, m=ua.match(/(Firefox|Edg|Chrome|Safari)\/(\d+)/)||["?","?","?"];
+  var mob=/Mobi|Android|iPhone/i.test(ua);
+  var items=[
+    row(t("diag_ws"),navigator.serial?t("diag_ws_present"):t("diag_ws_absent"),s),
+    row(t("diag_sec"),(secure==="ok"?t("diag_sec_ok"):t("diag_sec_no")),secure),
+    row(t("diag_host"),hostLoc||t("diag_host_ok"),hostLoc?"ok":"wr"),
+    row(t("diag_browser"),m[1]+" "+m[2]),
+    row(t("diag_ua"),mob?t("diag_ua_mobile"):t("diag_ua_no"),mob?"no":"ok"),
+    row(t("diag_rm"),reduced?t("diag_rm_on"):t("diag_rm_off"),reduced?"wr":"ok"),
+    row(t("diag_cores"),String(cores)),
+    row(t("diag_mem"),String(mem)),
+    row(t("diag_esptool"),D.getElementById("cmd")?t("diag_cmd"):"—","ok"),
+    row(t("diag_fw"),current?devices[current].name:"—",current?"ok":"wr")
+  ];
+  $('#diagList').innerHTML=items.join("");
+  $('#diagScan').textContent=tfmt("diag_scanned",[stamp()]);
+  $('#ledSecure').className="led "+secure;
+  $('#ledSerial').className="led "+s;
+}
+$('#btnRecheck').addEventListener("click",function(){log(t("act_scan"),"in");runDiag()});
+$('#btnDmesg').addEventListener("click",function(){copy("dmesg | tail -20 && ls -l /dev/tty{USB,ACM}*","#btnDmesg")});
+
+/* ---------- presse-papiers ---------- */
+function copy(txt,btnId){
+  var done=function(){var b=btnId&&$(btnId);if(!b)return;
+    if(b.classList.contains("copy")){b.dataset.done="1";b.textContent=t("copy_done");setTimeout(function(){b.dataset.done="0";b.textContent=t("copy")},1600)}
+    else{var o=b.textContent;b.textContent=t("copy_done_s");setTimeout(function(){b.textContent=o},1400)}};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else fallback();
+  function fallback(){
+    var ta=D.createElement("textarea");ta.value=txt;ta.setAttribute("readonly","");ta.style.position="fixed";ta.style.top="-1000px";
+    D.body.appendChild(ta);ta.select();try{D.execCommand("copy")}catch(e){}D.body.removeChild(ta);done();
+  }
+  log(t("clip"),"in");
+}
+function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX1-0-2.bin")}
+var port="/dev/ttyUSB0";
+$('#ports').addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  port=b.dataset.port;
+  $$("#ports button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});
+  $('#cmdPort').textContent=port;save("port",port);
+  log(tfmt("port_sel",[port]),"in");
+});
+$('#copyCmd').addEventListener("click",function(){copy(rawCmd(),"#copyCmd")});
+$('#copyCmd2').addEventListener("click",function(){copy(rawCmd(),"#copyCmd2")});
+$('#copyTree').addEventListener("click",function(){copy($('#tree').textContent,"#copyTree")});
+
+/* ---------- arborescence attendue ---------- */
+function modeLblUpdate(){$('#modeLbl').textContent=USE_FILE_MANIFEST?t("mode_file"):t("mode_blob")}
+function renderTree(){
+  $('#tree').innerHTML=
+  "<span class='c'>"+t("tree_root")+"</span>\n"+
+  "index.html                    <span class='c'>"+t("tree_page")+"</span>\n"+
+  "EvilFoX1-0-2.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
+  "M5EvilFoX1-0-2.bin            <span class='c'>"+t("tree_m5")+"</span>\n"+
+  "manifest-esp32.json           <span class='c'>"+t("tree_opt")+"</span>\n"+
+  "manifest-m5.json              <span class='c'>"+t("tree_opt2")+"</span>\n"+
+  "esp32.png · m5.png            <span class='c'>"+t("tree_img")+"</span>";
+}
+
+/* ---------- interactions ---------- */
+$('#langBtn').addEventListener("click",function(){
+  LANG=LANG==="fr"?"en":"fr";
+  applyLang();
+  save("lang",LANG);
+  log(t("lang_now"),"in");
+});
+$('#devices').addEventListener("click",function(e){
+  var b=e.target.closest(".dev");if(!b)return;
+  pickDevice(b.dataset.key);
+});
+cta.addEventListener("click",fire);
+$('#btnWipe').addEventListener("click",function(){LOG.innerHTML="";buf=[];log(t("log_wiped"),"in")});
+$('#btnSave').addEventListener("click",function(){
+  var a=D.createElement("a");a.href=URL.createObjectURL(new Blob([buf.join("\n")],{type:"text/plain"}));
+  a.download="evilfox-log.txt";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1500);
+  log(t("log_export"),"ok");
+});
+D.addEventListener("keydown",function(e){
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  var t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;
+  var k=e.key.toLowerCase();
+  if(k>="1"&&k<="4"){showTab(["web","cli","diag","doc"][+k-1]);e.preventDefault()}
+  else if(k==="e"){fire();e.preventDefault()}
+  else if(k==="c"){copy(rawCmd(),"#copyCmd");e.preventDefault()}
+  else if(k==="l"){$('#btnWipe').click();e.preventDefault()}
+});
+/* raccourcis visuels sur les devices */
+function devTitles(){$$("#devices .dev").forEach(function(b,i){b.title=tfmt("dev_title",[i+1])})}
+devTitles();
+
+/* ---------- boot ---------- */
+$('#buildId').textContent=VER+"-"+(D.lastModified?new Date(D.lastModified).toISOString().slice(0,10).replace(/-/g,""):"local");
+(function boot(){
+  applyLang();
+  var seq=[
+    [t("log_boot"),0],
+    [t("log_ctx")+" "+(W.isSecureContext?t("log_ctx_ok"):t("log_ctx_no")),90,W.isSecureContext?"ok":"er"],
+    [t("log_module_load"),150,"in"],
+    [t("log_deleg"),240,"ok"],
+    [t("log_restore"),300,"in"],
+    [t("log_ready"),420,"rn"]
+  ];
+  seq.forEach(function(s){setTimeout(function(){log(s[0],s[2]||"in")},s[1])});
+  setTimeout(function(){
+    if(W.customElements&&customElements.whenDefined){
+      customElements.whenDefined("esp-web-install-button").then(function(){initEsp();watchdog();
+        if(current)setManifest(host.getAttribute("manifest")||devices[current].manifest)},{once:true})
+        .catch(function(){fallbackModule()});
+      setTimeout(function(){if(!host)fallbackModule()},4500);
+    }else fallbackModule();
+  },300);
+})();
+function fallbackModule(){log(t("cli_fb"),"wr");
+  setCta(t("cta_noweb"),"err");}
+/* re-essayer le module depuis unpkg si absent */
+if(!customElements.get("esp-web-install-button")){
+  var sc=D.createElement("script");sc.type="module";
+  sc.src="https://unpkg.com/esp-web-tools@10.0.1/dist/web/install-button.js?module";
+  sc.onerror=function(){log(t("sc_err"),"er")};
+  D.head.appendChild(sc);
+}
+/* restauration */
+(function restore(){
+  var d=load("device");if(d&&devices[d])pickDevice(d);else{renderDl();}
+  var p=load("port");if(p){port=p;$('#cmdPort').textContent=p;$$("#ports button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.port===p))})}
+  var h=W.location.hash.slice(1);
+  showTab(["web","cli","diag","doc"].indexOf(h)>-1?h:(load("tab")||"web"));
+  var t=0;
+  (function tick(){var d=new Date(),pd=function(n){return(n<10?"0":"")+n};
+    $('#clock').textContent=pd(d.getHours())+":"+pd(d.getMinutes())+":"+pd(d.getSeconds());},0);
+  setInterval(function(){var d=new Date(),pd=function(n){return(n<10?"0":"")+n};$('#clock').textContent=pd(d.getHours())+":"+pd(d.getMinutes())+":"+pd(d.getSeconds())},1000);
+  if(W.performance&&performance.getEntriesByType){
+    setTimeout(function(){var n=performance.getEntriesByType("paint").map(function(p){return Math.round(p.startTime)});
+      $('#perf').textContent="fcp "+(n[1]||n[0]||"?")+"ms · "+Math.round(performance.getEntriesByType("navigation")[0].domContentLoadedEventEnd)+"ms dcl"},600);
+  }
+})();
+/* fond */
+rain();
+})();
+</script>
+</body>
+</html>

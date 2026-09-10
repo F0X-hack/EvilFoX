@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Templates - Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0A0B1E;
+            --secondary: #1A1B3A;
+            --accent: #6366F1;
+            --accent-light: #8B5CF6;
+            --accent-bright: #A855F7;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8BCC8;
+            --text-muted: #6B7280;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --glow: 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-20px) translateY(-20px); }
+            50% { transform: translateX(20px) translateY(-10px); }
+            75% { transform: translateX(-10px) translateY(20px); }
+        }
+
+        /* Glass Morphism Grid */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.03;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 30s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Header */
+        .header {
+            padding: 2rem 0 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.7;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 4rem auto 0;
+            padding: 0 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            background: var(--surface-hover);
+        }
+
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Templates Section */
+        .templates-section {
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-description {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .templates-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .template-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            group: template-card;
+        }
+
+        .template-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-8px);
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .template-card:hover::before {
+            opacity: 1;
+        }
+
+        .template-preview {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .template-preview::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .template-card:hover .template-preview::after {
+            left: 100%;
+        }
+
+        .brand-icon {
+            font-size: 3rem;
+            filter: drop-shadow(0 0 20px currentColor);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .template-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .template-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .template-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .template-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .download-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Brand-specific colors */
+        .quick { --brand-gradient: linear-gradient(135deg, #FF6600, #E30613); }
+        .kfc { --brand-gradient: linear-gradient(135deg, #E4002B, #000000); }
+        .basicfit { --brand-gradient: linear-gradient(135deg, #FF6B35, #F7931E); }
+        .burgerking { --brand-gradient: linear-gradient(135deg, #D62300, #FFC72C); }
+        .sncf { --brand-gradient: linear-gradient(135deg, #0088CE, #E73C7E); }
+        .auchan { --brand-gradient: linear-gradient(135deg, #E30613, #FF6B35); }
+        .google { --brand-gradient: linear-gradient(135deg, #4285F4, #34A853); }
+        .monoprix { --brand-gradient: linear-gradient(135deg, #E30613, #8B0000); }
+        .mcdo { --brand-gradient: linear-gradient(135deg, #FFC72C, #DA291C); }
+        .carrefour { --brand-gradient: linear-gradient(135deg, #0053A0, #E30613); }
+        .leclerc { --brand-gradient: linear-gradient(135deg, #0053A0, #00A0E6); }
+        .starbucks { --brand-gradient: linear-gradient(135deg, #00704A, #F0F0F0); }
+
+        .template-card.quick .template-preview { background: var(--brand-gradient); }
+        .template-card.kfc .template-preview { background: var(--brand-gradient); }
+        .template-card.basicfit .template-preview { background: var(--brand-gradient); }
+        .template-card.burgerking .template-preview { background: var(--brand-gradient); }
+        .template-card.sncf .template-preview { background: var(--brand-gradient); }
+        .template-card.auchan .template-preview { background: var(--brand-gradient); }
+        .template-card.google .template-preview { background: var(--brand-gradient); }
+        .template-card.monoprix .template-preview { background: var(--brand-gradient); }
+        .template-card.mcdo .template-preview { background: var(--brand-gradient); }
+        .template-card.carrefour .template-preview { background: var(--brand-gradient); }
+        .template-card.leclerc .template-preview { background: var(--brand-gradient); }
+        .template-card.starbucks .template-preview { background: var(--brand-gradient); }
+
+        /* Footer */
+        .footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 3rem 0 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .hero-title {
+                font-size: clamp(2rem, 10vw, 4rem);
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .template-card {
+                padding: 1rem;
+            }
+
+            .template-preview {
+                height: 150px;
+            }
+
+            .brand-icon {
+                font-size: 2.5rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll animations */
+        @media (prefers-reduced-motion: no-preference) {
+            .template-card {
+                opacity: 0;
+                transform: translateY(30px);
+                animation: fadeInUp 0.6s ease forwards;
+            }
+
+            .template-card:nth-child(1) { animation-delay: 0.1s; }
+            .template-card:nth-child(2) { animation-delay: 0.2s; }
+            .template-card:nth-child(3) { animation-delay: 0.3s; }
+            .template-card:nth-child(4) { animation-delay: 0.4s; }
+            .template-card:nth-child(5) { animation-delay: 0.5s; }
+            .template-card:nth-child(6) { animation-delay: 0.6s; }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">🌐 WiFi Templates</div>
+            <ul class="nav-links">
+                <li><a href="#templates">Templates</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero">
+            <h1 class="hero-title">Collection<br>WiFi Templates</h1>
+            <p class="hero-subtitle">Pages de connexion WiFi</p>
+            <p class="hero-description">
+                Découvrez la collection de templates WiFi, 
+                conçus pour offrir des Templates efficace. 
+                Tous nos templates sont responsive et optimisés pour mobile et pc.
+            </p>
+            
+
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Templates</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Responsive</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">Free</div>
+                <div class="stat-label">Gratuit</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">2025</div>
+                <div class="stat-label">Moderne</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Templates Section -->
+    <section class="templates-section" id="templates">
+        <div class="section-header">
+            <h2 class="section-title">Templates Disponibles</h2>
+            <p class="section-description">
+                Chaque template est soigneusement conçu aux couleurs de la marque 
+                avec une attention particulière portée à l'expérience utilisateur.
+            </p>
+        </div>
+
+        <div class="templates-grid">
+            <!-- Quick Template -->
+            <div class="template-card quick">
+                <div class="template-preview">
+                    <div class="brand-icon">🍔</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Quick WiFi</h3>
+                    <p class="template-description">
+                        Page de connexion WiFi pour les restaurants Quick avec design aux couleurs de la marque.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Restaurant</span>
+                        <span class="tag">Orange</span>
+                    </div>
+                    <a href="template/Quick Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- KFC Template -->
+            <div class="template-card kfc">
+                <div class="template-preview">
+                    <div class="brand-icon">🍗</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">KFC WiFi</h3>
+                    <p class="template-description">
+                        Template WiFi Kentucky Fried Chicken avec les couleurs rouge et noir emblématiques.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Fast Food</span>
+                        <span class="tag">Rouge</span>
+                    </div>
+                    <a href="template/KFC Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Basic Fit Template -->
+            <div class="template-card basicfit">
+                <div class="template-preview">
+                    <div class="brand-icon">💪</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Basic Fit WiFi</h3>
+                    <p class="template-description">
+                        Template WiFi pour les salles de sport Basic Fit avec design énergique.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Sport</span>
+                        <span class="tag">Orange</span>
+                    </div>
+                    <a href="template/Basic Fit Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Burger King Template -->
+            <div class="template-card burgerking">
+                <div class="template-preview">
+                    <div class="brand-icon">👑</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Burger King WiFi</h3>
+                    <p class="template-description">
+                        Page WiFi royale pour Burger King avec couronne dorée et design flame grilled.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Fast Food</span>
+                        <span class="tag">Rouge</span>
+                    </div>
+                    <a href="template/Burger King Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SNCF Template -->
+            <div class="template-card sncf">
+                <div class="template-preview">
+                    <div class="brand-icon">🚄</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">SNCF Connect WiFi</h3>
+                    <p class="template-description">
+                        Template professionnel SNCF Connect pour les gares et trains avec design épuré.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Transport</span>
+                        <span class="tag">Bleu</span>
+                    </div>
+                    <a href="template/SNCF Connect Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Auchan Template -->
+            <div class="template-card auchan">
+                <div class="template-preview">
+                    <div class="brand-icon">🛒</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Auchan WiFi</h3>
+                    <p class="template-description">
+                        Template professionnel pour les centres commerciaux Auchan.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Commerce</span>
+                        <span class="tag">Rouge</span>
+                    </div>
+                    <a href="template/Auchan Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Google WiFi Template -->
+            <div class="template-card google">
+                <div class="template-preview">
+                    <div class="brand-icon">🌐</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Free WiFi (Google)</h3>
+                    <p class="template-description">
+                        Page WiFi avec authentification Google.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Universel</span>
+                        <span class="tag">Mobile</span>
+                    </div>
+                    <a href="template/Free WiFi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Monoprix Template -->
+            <div class="template-card monoprix">
+                <div class="template-preview">
+                    <div class="brand-icon">🛍️</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Monoprix WiFi</h3>
+                    <p class="template-description">
+                        Template élégant pour les magasins Monoprix.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Commerce</span>
+                        <span class="tag">Rouge</span>
+                    </div>
+                    <a href="template/Monoprix Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- McDonald's Template -->
+            <div class="template-card mcdo">
+                <div class="template-preview">
+                    <div class="brand-icon">🍟</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">McDonald's WiFi</h3>
+                    <p class="template-description">
+                        Template iconique aux couleurs jaune et rouge de McDonald's.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Fast Food</span>
+                        <span class="tag">Jaune</span>
+                    </div>
+                    <a href="template/Free Wifi Mcdo.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Carrefour Template -->
+            <div class="template-card carrefour">
+                <div class="template-preview">
+                    <div class="brand-icon">🏪</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Carrefour WiFi</h3>
+                    <p class="template-description">
+                        Template professionnel pour les hypermarchés Carrefour.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Hypermarché</span>
+                        <span class="tag">Bleu</span>
+                    </div>
+                    <a href="template/Carrefour Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Leclerc Template -->
+            <div class="template-card leclerc">
+                <div class="template-preview">
+                    <div class="brand-icon">🛒</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">E.Leclerc WiFi</h3>
+                    <p class="template-description">
+                        Template moderne pour les centres E.Leclerc.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Commerce</span>
+                        <span class="tag">Bleu</span>
+                    </div>
+                    <a href="template/E.Leclerc Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Starbucks Template -->
+            <div class="template-card starbucks">
+                <div class="template-preview">
+                    <div class="brand-icon">☕</div>
+                </div>
+                <div class="template-content">
+                    <h3 class="template-title">Starbucks WiFi</h3>
+                    <p class="template-description">
+                        Template premium pour les cafés Starbucks avec ambiance chaleureuse.
+                    </p>
+                    <div class="template-tags">
+                        <span class="tag">Café</span>
+                        <span class="tag">Vert</span>
+                    </div>
+                    <a href="template/Starbucks Wifi.html" class="download-btn">
+                        <span>⬇️</span>
+                        <span>Télécharger</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">🌐 WiFi Templates Collection</div>
+            <p class="footer-text">
+                Templates WiFi responsives • Design moderne • Code sécurisé • © 2025
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add ripple effect to buttons
+        document.querySelectorAll('.download-btn, .btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                
+                ripple.style.position = 'absolute';
+                ripple.style.width = size + 'px';
+                ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'rippleEffect 0.6s ease-out';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.zIndex = '1000';
+                
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        if ('IntersectionObserver' in window) {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.template-card, .stat-item').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Parallax effect for background
+        let ticking = false;
+        
+        function updateParallax() {
+            const scrolled = window.pageYOffset;
+            const background = document.querySelector('.background');
+            
+            if (background) {
+                background.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+            
+            ticking = false;
+        }
+
+        function requestTick() {
+            if (!ticking) {
+                requestAnimationFrame(updateParallax);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', requestTick);
+
+        // Add CSS for ripple effect
+        const additionalStyles = document.createElement('style');
+        additionalStyles.textContent = `
+            @keyframes rippleEffect {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(additionalStyles);
+    </script>
+</body>
+</html>
