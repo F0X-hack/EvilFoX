@@ -75,10 +75,26 @@ ul,ol{padding:0;list-style:none}
 header.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.25rem;align-items:end;
   border-bottom:2px solid var(--red);padding:1.75rem 0 1rem}
 .brand{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap}
-.brand h1{font-size:clamp(2.1rem,7.5vw,4.5rem);line-height:.9;font-weight:700;letter-spacing:-.045em;text-transform:uppercase;position:relative}
-.brand h1::after{content:attr(data-txt);position:absolute;inset:0;color:var(--red);opacity:.9;clip-path:inset(45% 0 42% 0);transform:translate(2px);mix-blend-mode:screen}
-.brand h1:hover::after{animation:glitch .45s steps(2,end) 2}
-@keyframes glitch{0%{transform:translate(3px,-1px);clip-path:inset(10% 0 70% 0)}50%{transform:translate(-3px,1px);clip-path:inset(60% 0 15% 0)}100%{transform:translate(1px,0);clip-path:inset(35% 0 45% 0)}}
+.brand h1{font-size:clamp(2.1rem,7.5vw,4.5rem);line-height:.9;font-weight:700;letter-spacing:-.045em;text-transform:uppercase;position:relative;color:var(--fg)}
+.brand h1::before,.brand h1::after{content:attr(data-txt);position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen}
+.brand h1::before{color:#c77dff;animation:glitch-b 5s linear infinite}
+.brand h1::after{color:var(--red);animation:glitch-a 5s linear infinite}
+@keyframes glitch-a{
+  0%,78%{transform:translate(0,0);clip-path:inset(46% 0 40% 0);opacity:0}
+  79%{transform:translate(-3px,1px) rotate(-.4deg);clip-path:inset(6% 0 78% 0);opacity:1}
+  81%{transform:translate(5px,-2px) skewX(-9deg);clip-path:inset(58% 0 26% 0);opacity:1}
+  83%{transform:translate(-4px,2px) rotate(.6deg);clip-path:inset(22% 0 64% 0);opacity:1}
+  85%{transform:translate(3px,0) skewX(7deg);clip-path:inset(72% 0 10% 0);opacity:0}
+  87%,100%{transform:translate(0,0);clip-path:inset(46% 0 40% 0);opacity:0}
+}
+@keyframes glitch-b{
+  0%,78%{transform:translate(0,0);clip-path:inset(52% 0 38% 0);opacity:0}
+  79%{transform:translate(6px,-2px) skewX(10deg);clip-path:inset(14% 0 70% 0);opacity:1}
+  81%{transform:translate(-5px,1px) rotate(.6deg);clip-path:inset(60% 0 20% 0);opacity:1}
+  83%{transform:translate(4px,2px) skewX(-8deg);clip-path:inset(30% 0 54% 0);opacity:1}
+  85%{transform:translate(-2px,0);clip-path:inset(4% 0 84% 0);opacity:0}
+  87%,100%{transform:translate(0,0);clip-path:inset(52% 0 38% 0);opacity:0}
+}
 .tag{color:var(--red);font-weight:700;border:var(--hair) solid var(--red-d);padding:.15rem .4rem;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
 .sub{color:var(--fg2);font-size:12px;margin-top:.5rem;max-width:56ch}
 .ascii{color:var(--red-d);font-size:9px;line-height:1.05;white-space:pre;overflow:hidden;user-select:none;opacity:.85}
@@ -305,12 +321,10 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
             <div class="devices" id="devices" role="group" aria-label="Choix de l'appareil">
               <button class="dev" type="button" aria-pressed="false" data-key="esp32"
                       data-name="ESP32 Standard" data-chip="ESP32" data-off="0" data-manifest="manifest-esp32.json"
-                      data-bin="EvilFoX2-0-0.bin" data-dl="https://github.com/F0X-hack/EvilFoX/raw/refs/heads/main/EvilFoX2-0-0.bin">
+                      data-bin="EvilFoX1-0-2.bin" data-dl="https://github.com/FoX-hxck/EvilFoX/raw/refs/heads/main/EvilFoX1-0-2.bin">
                 <img src="esp32.png" alt="ESP32" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
                 <span>
                   <span class="n">ESP32</span>
-                  <span class="d" data-i18n="dev_esp32_d">Devboard standard · 38 pins</span>
-                  <span class="chip" data-i18n="chip_combined">combined image · 0x0</span>
                 </span>
               </button>
               <button class="dev" type="button" aria-pressed="false" data-key="m5stick"
@@ -319,8 +333,6 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
                 <img src="m5.png" alt="M5StickC Plus2" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
                 <span>
                   <span class="n">M5StickC Plus2</span>
-                  <span class="d" data-i18n="dev_m5_d">Stick 1.14" · PWR2 / G0 / G10</span>
-                  <span class="chip" data-i18n="chip_combined">combined image · 0x0</span>
                 </span>
               </button>
             </div>
@@ -420,7 +432,7 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
           <div class="code">
             <button class="copy" id="copyCmd" type="button" data-done="0" data-i18n="copy">copier</button>
             <pre id="cmd"><span class="c"># erase then write combined image at 0x0</span>
-<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX2-0-0.bin</span></pre>
+<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX1-0-2.bin</span></pre>
           </div>
           <div class="row" style="margin-top:.6rem">
             <button class="btn" id="copyCmd2" type="button" data-i18n="copy_no">copier sans le $</button>
@@ -540,6 +552,7 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
 
   <footer class="foot">
     <span data-i18n="footer_t">EVILFOX PROJECT · 2025 · firmware sécurisé, droits respectés</span>
+    <span class="lg">« STAY HOME, STAY SAFE, STAY HUNGRY »</span>
     <span id="perf">—</span>
   </footer>
 </div>
@@ -604,7 +617,6 @@ fr:{
   hero_sub:"EvilFox v2.0.0 — Evil Twin amélioré, vol d'identifiants, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code> / <code>FoXhack_Evil</code>. Usage éducatif, sur ton réseau uniquement.",
   tab_web:"web flash", tab_cli:"cli · linux / macos", tab_diag:"diagnostic", tab_doc:"notes de version",
   target_panel:"cible", no_target:"aucune cible",
-  dev_esp32_d:"Devboard standard · 38 pins", dev_m5_d:"Stick 1.14\" · PWR2 / G0 / G10", chip_combined:"combined image · 0x0",
   kv_target:"cible", kv_chip:"chip family", kv_bin:"binaire", kv_manifest:"manifest",
   cta_waiting:"en attente de cible", cta_select:"Sélectionne un appareil",
   cta_flash:"Flasher {0}", cta_flashing:"Flash en cours — ne pas débrancher", cta_done:"Flash terminé ✓", cta_error:"Erreur — réessayer", cta_select_target:"Sélectionne un appareil !", cta_port:"Ouverture du sélecteur de port…", cta_noweb:"Web flash indisponible — onglet CLI",
@@ -641,7 +653,7 @@ fr:{
   diag_scanned:"scanné {0}",
   log_module:"module Web Tools chargé", log_flash:"écriture du flash en cours…", log_done:"flash terminé, appareil prêt", log_error:"erreur : {0}", log_no_target:"aucune cible : sélectionne un appareil d\'abord", log_noweb:"Web Serial indisponible → onglet CLI", log_port_open:"sélecteur de port ouvert (shadow)", log_port_fb:"fallback : évènement click sur le host", log_boot:"boot", log_ctx:"contexte {0}", log_ctx_ok:"sécurisé ✓", log_ctx_no:"NON sécurisé — Web Serial bloqué ✗", log_module_load:"chargement du module esp-web-tools…", log_deleg:"delegations : devices / ports / tabs ✓", log_restore:"preference persistante restaurée", log_ready:"pret. branche l\'ESP et choisi une cible.",
   log_noser:"port série accessible", log_lock:"cible verrouillée : {0}",
-  github:"dépôt github", backup:"télécharger (CLI)",
+  github:"dépôt github",
   act_scan:"scan d'environnement…", clip:"presse-papiers mis à jour", copy_done:"copié ✓", copy_done_s:"copié", port_sel:"port série → {0}", blob_gen:"blob://généré", dev_title:"raccourci : {0} puis E",
   log_wiped:"journal vidé", log_export:"journal exporté", blob_rejected:"blob refusé → fichier {0}", device_info:"device: {0} · {1} · {2}", manifest_loaded:"manifest chargé",
   lang_now:"interface en français", cli_fb:"module Web Tools indisponible (CDN hors-ligne ?) → passe par l'onglet CLI",
@@ -654,7 +666,6 @@ en:{
   hero_sub:"EvilFox v2.0.0 — improved Evil Twin, credential harvesting, Wi-Fi scanning, custom HTML templates. Admin: <code>192.168.4.1</code> / WiFi: <code>FoXhack</code> / <code>FoXhack_Evil</code>. For educational use on your own network only.",
   tab_web:"web flash", tab_cli:"cli · linux / macos", tab_diag:"diagnostics", tab_doc:"release notes",
   target_panel:"target", no_target:"no target",
-  dev_esp32_d:"Standard devboard · 38 pins", dev_m5_d:"Stick 1.14\" · PWR2 / G0 / G10", chip_combined:"combined image · 0x0",
   kv_target:"target", kv_chip:"chip family", kv_bin:"binary", kv_manifest:"manifest",
   cta_waiting:"waiting for target", cta_select:"Select a device",
   cta_flash:"Flash {0}", cta_flashing:"Flashing — do not unplug", cta_done:"Flash complete ✓", cta_error:"Error — retry", cta_select_target:"Select a device first!", cta_port:"Opening port picker…", cta_noweb:"Web flash unavailable — CLI tab",
@@ -691,7 +702,7 @@ en:{
   diag_scanned:"scanned {0}",
   log_module:"Web Tools module loaded", log_flash:"flashing in progress…", log_done:"flash complete, device ready", log_error:"error: {0}", log_no_target:"no target: select a device first", log_noweb:"Web Serial unavailable → CLI tab", log_port_open:"port picker opened (shadow)", log_port_fb:"fallback: click event on the host", log_boot:"boot", log_ctx:"secure context {0}", log_ctx_ok:"secure ✓", log_ctx_no:"NOT secure — Web Serial blocked ✗", log_module_load:"loading esp-web-tools module…", log_deleg:"delegations: devices / ports / tabs ✓", log_restore:"stored preference restored", log_ready:"ready. plug in the ESP and pick a target.",
   log_noser:"serial port accessible", log_lock:"target locked: {0}",
-  github:"github repo", backup:"download (CLI)",
+  github:"github repo",
   act_scan:"environment scan…", clip:"clipboard updated", copy_done:"copied ✓", copy_done_s:"copied", port_sel:"serial port → {0}", blob_gen:"blob://generated", dev_title:"shortcut: {0} then E",
   log_wiped:"log cleared", log_export:"log exported", blob_rejected:"blob refused → file {0}", device_info:"device: {0} · {1} · {2}", manifest_loaded:"manifest loaded",
   lang_now:"interface switched to english", cli_fb:"Web Tools module unavailable (CDN offline?) → use the CLI tab",
@@ -757,7 +768,7 @@ function renderDl(){
   var html="",k;
   for(k in devices){
     var d=devices[k];
-    html+='<a href="'+d.dl+'" target="_blank" rel="noopener noreferrer" download="'+d.bin+'"><span class="ar">↓</span><span><strong>'+d.bin+'</strong><span class="t2">'+d.name+' · '+t("backup")+(current===k?' · '+t("kv_target"):'')+'</span></span></a>';
+    html+='<a href="'+d.dl+'" target="_blank" rel="noopener noreferrer" download="'+d.bin+'"><span class="ar">↓</span><span><strong>'+d.bin+'</strong></span></a>';
   }
   $('#dlBtns').innerHTML=html;
 }
@@ -890,7 +901,7 @@ function copy(txt,btnId){
   }
   log(t("clip"),"in");
 }
-function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX2-0-0.bin")}
+function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX1-0-2.bin")}
 var port="/dev/ttyUSB0";
 $('#ports').addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
@@ -909,7 +920,7 @@ function renderTree(){
   $('#tree').innerHTML=
   "<span class='c'>"+t("tree_root")+"</span>\n"+
   "index.html                    <span class='c'>"+t("tree_page")+"</span>\n"+
-  "EvilFoX2-0-0.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
+  "EvilFoX1-0-2.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
   "M5EvilFoX1-0-2.bin            <span class='c'>"+t("tree_m5")+"</span>\n"+
   "manifest-esp32.json           <span class='c'>"+t("tree_opt")+"</span>\n"+
   "manifest-m5.json              <span class='c'>"+t("tree_opt2")+"</span>\n"+
@@ -995,6 +1006,41 @@ if(!customElements.get("esp-web-install-button")){
 })();
 /* fond */
 rain();
+
+/* ---------- glitch de lettres : glyphes aléatoires sur le titre ---------- */
+(function lettersGlitch(){
+  if(reduced)return;
+  var h1=$('.brand h1');if(!h1)return;
+  var base=h1.getAttribute("data-txt")||"EVILFOX";
+  var glyphs="ABCDEF0123456789#%&@/\\|=+*<>$";
+  var sl=function(i){return glyphs[(Math.random()*glyphs.length)|0]};
+  var running=false;
+  function burst(){
+    if(running)return;running=true;
+    var steps=5+(Math.random()*6|0);
+    var n=0;
+    var max=base.length;
+    (function tick(){
+      n++;
+      var s="";
+      for(var i=0;i<max;i++){s+=sl(i)}
+      h1.textContent=s;h1.setAttribute("data-txt",s);
+      if(n>=steps){
+        setTimeout(function(){
+          h1.textContent=base;h1.setAttribute("data-txt",base);running=false;next();
+        },40);
+        return;
+      }
+      setTimeout(tick,38+Math.random()*34);
+    })();
+  }
+  function next(){
+    setTimeout(function(){
+      if(!D.hidden)burst();else next();
+    },1500+Math.random()*2400);
+  }
+  next();
+})();
 })();
 </script>
 </body>
