@@ -165,6 +165,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
+<script type="module" src="https://unpkg.com/esp-web-tools@10.0.1/dist/web/install-button.js?module"></script>
 <style>
 /* ============================================================
    EVILFOX · loader terminal — thème type convention DEF CON
@@ -788,7 +789,7 @@ W.__foxlog=log;
 
 /* ---------- configuration ---------- */
 var VER="2.0.0";
-var USE_FILE_MANIFEST=false;            /* true => always utiliser manifest-*.json */
+var USE_FILE_MANIFEST=true;            /* true => toujours utiliser manifest-*.json (requis pour les URL relatives de firmware) */
 var devices={};
 $$("#devices .dev").forEach(function(b){
   devices[b.dataset.key]={
@@ -975,16 +976,18 @@ function pickDevice(key,skip){
   $('#cmdChip').textContent=d.chip.toLowerCase();
   $('#cmdBin').textContent=d.bin;
   renderDl();
-  /* manifeste : blob si dispo, sinon fichier statique */
+  /* manifeste : fichier statique recommandé pour résolution des binaires */
   if(!USE_FILE_MANIFEST&&W.URL&&URL.createObjectURL){
     try{
       if(blobUrl)URL.revokeObjectURL(blobUrl);
       blobUrl=URL.createObjectURL(new Blob([manifestFor(d)],{type:"application/json"}));
-      host.setAttribute("id","espHost");
       setManifest(blobUrl);
       $('#modeLbl').textContent=t("mode_gen");
     }catch(e){setManifest(d.manifest);USE_FILE_MANIFEST=true;$('#modeLbl').textContent=t("mode_file");log(tfmt("blob_rejected",[d.manifest]),"wr")}
-  }else{setManifest(d.manifest)}
+  }else{
+    setManifest(d.manifest);
+    $('#modeLbl').textContent=t("mode_file");
+  }
   save("device",key);
   if(!skip)log(tfmt("log_lock",[d.name+" ("+d.bin+", +0x"+d.offset.toString(16)+")"]),"rn");
 }
@@ -999,11 +1002,17 @@ function renderDl(){
 
 /* ---------- esp-web-tools : bootloader caché, évènements uniquement ---------- */
 var host=null,ready=false;
-function setManifest(m){if(host)host.setAttribute("manifest",m||"")}
+function setManifest(m){
+  if(!m && current && devices[current]) m=devices[current].manifest;
+  if(host)host.setAttribute("manifest",m||"");
+}
 function initEsp(){
+  if(host)return;
   var el=D.createElement("esp-web-install-button");
-  el.setAttribute("manifest","");
-  var box=$('#espHost');box.appendChild(el);host=el;
+  el.setAttribute("manifest",current&&devices[current]?devices[current].manifest:"");
+  var box=$('#espHost');
+  if(box)box.appendChild(el);
+  host=el;
   ready=true;
   el.addEventListener("initializing",function(){log(t("log_module"),"ok")});
   var inner=el.shadowRoot&&el.shadowRoot.querySelector("button");
