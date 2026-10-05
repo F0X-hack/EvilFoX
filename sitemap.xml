@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EvilFoX — https://evilfox.foxhack.fr
+  Loader de firmware (page unique, onglets gérés côté client).
+  Les onglets (#web, #cli, #diag, #doc) ne sont pas listés : une ancre ne
+  constitue pas une URL distincte. Ils sont exposés en données structurées
+  (SoftwareApplication + FAQPage) dans index.html.
+  Sous-domaine relié au domaine principal par un fil d'Ariane :
+  https://foxhack.fr → https://evilfox.foxhack.fr/
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://evilfox.foxhack.fr/</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://evilfox.foxhack.fr/og-image.png</image:loc>
+      <image:title>EvilFoX — loader de firmware ESP32 / M5StickC Plus2</image:title>
+      <image:caption>Interface du loader : sélection de la carte, flash Web Serial et commande esptool.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://evilfox.foxhack.fr/esp32.webp</image:loc>
+      <image:title>Carte de développement ESP32 — firmware EvilFoX</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://evilfox.foxhack.fr/m5.webp</image:loc>
+      <image:title>M5StickC Plus2 (M5Stack) — firmware EvilFoX</image:title>
+    </image:image>
+  </url>
+</urlset>
