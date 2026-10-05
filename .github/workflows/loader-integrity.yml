@@ -1,0 +1,77 @@
+name: CSP / integrite du loader
+
+# Garde-fou contre la panne du 2026-10-05 : index.html modifié, mais le hash
+# sha256 de la Content-Security-Policy resté sur l'ancienne version -> le
+# navigateur refuse d'exécuter le script inline -> page inerte (onglets figés,
+# ESP32 / M5 non sélectionnables, aucun flash).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  csp-hash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Hash CSP attendu par index.html
+        run: python3 tools/csp-hash.py
+
+      - name: La conf nginx doit correspondre a la page
+        run: python3 tools/csp-hash.py --check-file deploy/evilfox-headers.inc
+
+      - name: Syntaxe JS du script inline
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          html = pathlib.Path("index.html").read_text(encoding="utf-8")
+          bodies = [m.group(2) for m in
+                    re.finditer(r"<script\b([^>]*)>(.*?)</script>", html, re.S)
+                    if not re.search(r"\bsrc\s*=", m.group(1))]
+          assert len(bodies) == 1, f"1 script inline attendu, {len(bodies)} trouvé(s)"
+          pathlib.Path("/tmp/inline.js").write_text(bodies[0], encoding="utf-8")
+          print("script inline extrait:", len(bodies[0]), "caractères")
+          PY
+          node --check /tmp/inline.js
+
+      - name: Binaires et manifests coherents
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, re
+          root = pathlib.Path(".")
+          html = (root / "index.html").read_text(encoding="utf-8")
+
+          # 1) chaque data-bin doit exister sur le disque
+          bins = re.findall(r'data-bin="([^"]+)"', html)
+          assert bins, "aucun data-bin trouvé"
+          for b in bins:
+              assert (root / b).exists(), f"{b} référencé par index.html mais absent du dépôt"
+
+          # 2) chaque manifeste doit pointer sur un .bin existant
+          manifests = re.findall(r'data-manifest="([^"]+)"', html)
+          for m in manifests:
+              p = root / m
+              assert p.exists(), f"{m} absent du dépôt (requis : mode fichier statique)"
+              data = json.loads(p.read_text(encoding="utf-8-sig"))
+              for build in data["builds"]:
+                  for part in build["parts"]:
+                      path = part["path"]
+                      assert (root / path).exists(), f"{m} -> {path} introuvable"
+                      assert path in bins, f"{m} -> {path} différent du data-bin affiché ({bins})"
+                      assert part["offset"] == 0, f"{m} : offset {part['offset']} != 0x0 (image combinée)"
+
+          # 3) aucun firmware EvilFoX mentionné mais absent
+          stale = [n for n in re.findall(r"\b(?:M5)?EvilFoX[\w.-]*\.bin\b", html)
+                   if not (root / n).exists()]
+          assert not stale, f"index.html mentionne des firmwares absents : {sorted(set(stale))}"
+
+          print("OK :", ", ".join(bins), "|", ", ".join(manifests))
+          PY

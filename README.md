@@ -19,7 +19,8 @@ EvilFoX est un **outil red team / pentest** portable basé sur l'ESP32. Il clone
 
 Flash direct depuis le navigateur (Chromium, Web Serial) :
 
-> **[https://evilfox-q3jj.onrender.com/](https://evilfox-q3jj.onrender.com/)**
+> **[https://evilfox.foxhack.fr/](https://evilfox.foxhack.fr/)** — domaine projet
+> **[https://evilfox-q3jj.onrender.com/](https://evilfox-q3jj.onrender.com/)** — Render (même contenu)
 
 Ou ouvrez `index.html` en local (`http://localhost`). Pas de driver à installer, pas d'esptool.
 
@@ -30,7 +31,7 @@ Ou ouvrez `index.html` en local (`http://localhost`). Pas de driver à installer
 | ESP32 | `EvilFoX2-0-0.bin` | 2.0.0 |
 | M5StickC Plus2 (1.14") | `M5EvilFoX1-0-2.bin` | 1.0.2 |
 
-- `manifest-esp32.json` / `manifest-m5.json` : manifests optionnels pour le flasher (blob auto-généré sinon).
+- `manifest-esp32.json` / `manifest-m5.json` : **requis**. La page flashe toujours en mode « fichier statique » (`USE_FILE_MANIFEST=true`) pour que le `.bin` soit résolu en URL relative du même hôte — indispensable derrière une CSP stricte.
 - `esp32.png` / `m5.png` : images des boards pour le sélecteur d'appareil.
 - Flash CLI (alternative) :
 
@@ -38,6 +39,40 @@ Ou ouvrez `index.html` en local (`http://localhost`). Pas de driver à installer
 esptool.py --chip esp32 -p /dev/ttyUSB0 -b 460800 \
   --before default_reset --after hard_reset write_flash 0x0 EvilFoX2-0-0.bin
 ```
+
+---
+
+## Déploiement & CSP (`evilfox.foxhack.fr`)
+
+`index.html` est **autonome** : tout le JavaScript tient dans un seul `<script>` inline. Sur le vhost nginx (OVH) une `Content-Security-Policy` autorise ce script par son empreinte `sha256-…`. **Dès qu'un caractère du script change, le hash devient faux** — et la présence d'un hash fait ignorer `'unsafe-inline'` par le navigateur.
+
+Symptôme exact (panne du 2026-10-05) : la page s'affiche, mais **rien ne répond** — les onglets ne changent pas, les cartes ESP32 / M5StickC Plus2 ne se sélectionnent pas, le bouton `Connect` d'esp-web-tools n'apparaît jamais, aucun flash. Console : `Refused to execute inline script because it violates the following Content Security Policy directive…`. Render n'envoie aucune CSP : c'est pour cela que `evilfox-q3jj.onrender.com` fonctionnait pendant que `evilfox.foxhack.fr` était inerte.
+
+### Après chaque modification d'`index.html`
+
+```bash
+python3 tools/csp-hash.py                     # nouveau hash + directive prête à coller
+python3 tools/csp-hash.py --check 'sha256-…'  # vérifier le hash envoyé par le serveur
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Fichiers de référence : `deploy/nginx-evilfox.conf` (vhost + cache) et `deploy/evilfox-headers.inc` (en-têtes, dont la CSP et son hash). Une variante « zéro maintenance » sans hash (`script-src 'self' 'unsafe-inline' …`) y est fournie commentée.
+
+### Checklist de déploiement
+
+| Élément | Attendu |
+|---|---|
+| `index.html` | servi en `text/html`, **`Cache-Control: no-store`** (sinon vieux HTML + nouveau hash = page inerte) |
+| `EvilFoX2-0-0.bin` / `M5EvilFoX1-0-2.bin` | `200`, `application/octet-stream`, mêmes noms que dans les manifests |
+| `manifest-esp32.json` / `manifest-m5.json` | `200`, `application/json` — **requis** |
+| `esp32.png` / `m5.png` | `200` |
+| `script-src` | hash recalculé + `https://unpkg.com` (module esp-web-tools) + `blob:` |
+| `connect-src` | `'self'` + `https://unpkg.com` + `blob:` (manifeste + `.bin`) |
+| `worker-src` | `blob:` (workers esptool-js) |
+| HTTPS | obligatoire : Web Serial n'existe que dans un *secure context* (`https://` ou `http://localhost`) |
+| Navigateur | Chrome / Edge / Opera **desktop** (ni Firefox, ni Safari, ni Android) |
+
+Un bandeau violet « **JavaScript bloqué** » apparaît en haut de la page (après ~1,2 s) si le script inline n'a pas pu s'exécuter : la panne n'est plus silencieuse.
 
 ---
 
