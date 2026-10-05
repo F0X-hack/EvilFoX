@@ -5,165 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#050506">
-<!-- ============ SEO ============ -->
-<!-- Page servie sur le sous-domaine evilfox.foxhack.fr (domaine principal : foxhack.fr) -->
-<title>EvilFoX — Firmware Loader ESP32 / M5StickC Plus2 | Web Serial &amp; esptool</title>
-<meta name="description" content="Flash du firmware EvilFoX sur ESP32 ou M5StickC Plus2 : Web Serial en un clic depuis le navigateur, ou esptool en ligne de commande. Evil Twin, portail captif, scan Wi-Fi — tests autorisés uniquement.">
-<meta name="keywords" content="EvilFoX, ESP32, M5StickC Plus2, firmware loader, flasher ESP32, Web Serial, esptool, Evil Twin, portail captif, captive portal, scan Wi-Fi, red team, pentest, FoXhack">
-<meta name="author" content="FoXhack">
-<meta name="publisher" content="FoXhack">
-<meta name="application-name" content="EvilFoX Firmware Loader">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<link rel="canonical" href="https://evilfox.foxhack.fr/">
-
-<!-- OpenGraph -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="EvilFoX — FoXhack">
-<meta property="og:title" content="EvilFoX — Firmware Loader ESP32 / M5StickC Plus2">
-<meta property="og:description" content="Flash du firmware EvilFoX (Evil Twin, portail captif, scan Wi-Fi) sur ESP32 ou M5StickC Plus2 : Web Serial depuis le navigateur ou esptool en CLI.">
-<meta property="og:url" content="https://evilfox.foxhack.fr/">
-<meta property="og:image" content="https://evilfox.foxhack.fr/og-image.png">
-<meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="EvilFoX — loader de firmware ESP32 / M5StickC Plus2">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:locale:alternate" content="en_US">
-
-<!-- Twitter / X -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="EvilFoX — Firmware Loader ESP32 / M5StickC Plus2">
-<meta name="twitter:description" content="Web Serial ou esptool : Evil Twin, portail captif, scan Wi-Fi. Projet FoXhack — tests autorisés uniquement.">
-<meta name="twitter:image" content="https://evilfox.foxhack.fr/og-image.png">
-<meta name="twitter:image:alt" content="EvilFoX — loader de firmware ESP32 / M5StickC Plus2">
-
-<!-- i18n : la page est servie en français (défaut), l'anglais est proposé par la bascule client, même URL -->
-<link rel="alternate" hreflang="fr" href="https://evilfox.foxhack.fr/">
-<link rel="alternate" hreflang="en" href="https://evilfox.foxhack.fr/">
-<link rel="alternate" hreflang="x-default" href="https://evilfox.foxhack.fr/">
-
-<!-- Ressources : la première image affichée est préchargée (évite un décalage de mise en page) -->
-<link rel="preload" as="image" href="esp32.webp" type="image/webp">
-<link rel="manifest" href="manifest.webmanifest">
-
-<!-- Données structurées : logiciel + FAQ + fil d'Ariane, entités reliées par @id.
-     Le @id de la Person est celui publié par le domaine principal foxhack.fr. -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://evilfox.foxhack.fr/#website",
-      "url": "https://evilfox.foxhack.fr/",
-      "name": "EvilFoX — Firmware Loader",
-      "alternateName": "EvilFoX Web Flasher",
-      "description": "Loader web pour flasher le firmware EvilFoX sur ESP32 et M5StickC Plus2, via Web Serial ou esptool.",
-      "inLanguage": ["fr", "en"],
-      "publisher": { "@id": "https://foxhack.fr/#person" }
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://evilfox.foxhack.fr/#software",
-      "name": "EvilFoX",
-      "alternateName": "EvilFoX Firmware",
-      "softwareVersion": "2.0.0",
-      "applicationCategory": "SecurityApplication",
-      "applicationSubCategory": "Outil red team / pentest sur ESP32",
-      "operatingSystem": "ESP32, M5StickC Plus2",
-      "url": "https://evilfox.foxhack.fr/",
-      "downloadUrl": "https://evilfox.foxhack.fr/EvilFoX2-0-0.bin",
-      "codeRepository": "https://github.com/F0X-hack/EvilFoX",
-      "screenshot": "https://evilfox.foxhack.fr/og-image.png",
-      "image": "https://evilfox.foxhack.fr/og-image.png",
-      "description": "Firmware de recherche en sécurité Wi-Fi pour ESP32 et M5StickC Plus2 : Evil Twin, portail captif avec templates de marque, scan des réseaux et panneau d'administration web. Flash depuis le navigateur en Web Serial ou en ligne de commande avec esptool.",
-      "inLanguage": ["fr", "en"],
-      "isAccessibleForFree": true,
-      "isPartOf": { "@id": "https://evilfox.foxhack.fr/#website" },
-      "author": { "@id": "https://foxhack.fr/#person" },
-      "publisher": { "@id": "https://foxhack.fr/#person" },
-      "datePublished": "2025-07-29",
-      "dateModified": "2026-09-10",
-      "keywords": "Evil Twin, ESP32, M5StickC Plus2, Web Serial, esptool, portail captif, scan Wi-Fi, red team",
-      "featureList": [
-        "Flash Web Serial en un clic (sans driver ni esptool)",
-        "Flash en ligne de commande avec esptool",
-        "Diagnostic du navigateur et de l'API Web Serial",
-        "Notes de version et dépannage intégrés",
-        "Deux cibles : ESP32 et M5StickC Plus2"
-      ],
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "EUR",
-        "availability": "https://schema.org/InStock"
-      }
-    },
-    {
-      "@type": "BreadcrumbList",
-      "@id": "https://evilfox.foxhack.fr/#breadcrumb",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "FoXhack", "item": "https://foxhack.fr/" },
-        { "@type": "ListItem", "position": 2, "name": "EvilFoX — Firmware Loader", "item": "https://evilfox.foxhack.fr/" }
-      ]
-    },
-    {
-      "@type": "FAQPage",
-      "@id": "https://evilfox.foxhack.fr/#faq",
-      "inLanguage": "fr",
-      "isPartOf": { "@id": "https://evilfox.foxhack.fr/#website" },
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Le bouton du navigateur reste gris / « no port chosen »",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Utilise Chrome, Edge ou Opera de bureau : l'API Web Serial n'existe pas sur Firefox, Safari ni Android. La page doit être ouverte en https:// ou sur http://localhost."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "« Failed to connect to ESP32: No serial data received »",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Maintiens le bouton BOOT / GPIO0 (ESP32) ou le bouton G0 (M5StickC) enfoncé jusqu'au début du handshake, puis relâche. Tu peux aussi tester un autre port à 115200 bauds en retirant -b 460800."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "« Could not open COM3, the port is busy »",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Ferme ESPHome, Arduino IDE, PuTTY ou tout moniteur série, puis débranche et rebranche la carte. Sous Linux, vérifie que ton utilisateur est dans le groupe dialout (ou uucp)."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Le M5StickC reste noir après le flash",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Éteins la carte (appui long sur PWR), rallume-la et vérifie que tu as flashé le build M5StickC et non le build ESP32 : le pin mapping (écran 1,14\", boutons A/B/C) est différent."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Comment revenir au firmware d'usine ?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Re-flashe une image ESPHome / Home Assistant ou la dernière release EvilFoX avec la même commande esptool, à l'offset 0x0 pour une image combinée."
-          }
-        }
-      ]
-    }
-  ]
-}
-</script>
-
-<!-- Icônes -->
+<meta name="description" content="EvilFoX — installeur de firmware ESP32 / M5StickC Plus2. Flash Web Serial ou ligne de commande esptool.">
+<title>EVILFOX // FIRMWARE LOADER</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050506'/%3E%3Cpath d='M6 26 16 6l10 20-10-6z' fill='%239D4EDD'/%3E%3C/svg%3E">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <script type="module" src="https://unpkg.com/esp-web-tools@10.0.1/dist/web/install-button.js?module"></script>
 <style>
@@ -404,22 +248,6 @@ details .in code{color:var(--amber);background:#000;padding:.05rem .25rem;border
 footer.foot{margin-top:2.5rem;border-top:var(--hair) solid var(--line);padding-top:1rem;
   display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--fg3);letter-spacing:.06em}
 footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
-.foot-nav{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;align-items:center}
-.foot-nav a{color:var(--fg2);border-bottom:var(--hair) solid var(--line2);padding-bottom:1px}
-.foot-nav a:hover{color:var(--red);border-color:var(--red);text-decoration:none}
-.foot-nav a.prime{color:var(--red);border-color:var(--red-d)}
-/* --- section éditoriale sous les onglets (contenu indexable, liens internes/externes) --- */
-.about{margin-top:2.5rem;border-top:var(--hair) solid var(--line);padding-top:1.25rem}
-.about h2{font-size:clamp(1.05rem,3.4vw,1.5rem);letter-spacing:-.02em;margin-bottom:.25rem}
-.about h2 .c{color:var(--red)}
-.about .lead{color:var(--fg2);font-size:12.5px;max-width:78ch}
-.about p{color:var(--fg2);font-size:12.5px;margin-top:.85rem;max-width:88ch}
-.about p strong{color:var(--fg)}
-.about ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.35rem .75rem;margin-top:.9rem}
-.about li{color:var(--fg2);font-size:12px;padding-left:.9rem;position:relative}
-.about li::before{content:"▸";position:absolute;left:0;color:var(--red)}
-.about a{color:var(--red)}
-.about .src{font-size:11px;color:var(--fg3);margin-top:1rem}
 
 @media (max-width:720px){
   header.hero{grid-template-columns:minmax(0,1fr)}
@@ -464,10 +292,10 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
   <header class="hero">
     <div>
       <div class="brand">
-        <h1 data-txt="EVILFOX">EVILFOX<span class="sr"> — Firmware Loader ESP32 / M5StickC Plus2</span></h1>
+        <h1 data-txt="EVILFOX">EVILFOX</h1>
         <span class="tag" data-i18n="tag_loader">firmware loader</span>
       </div>
-      <p class="sub" data-i18n="hero_sub">EvilFoX v2.0.0 — loader de firmware pour ESP32 et M5StickC Plus2 : flash Web Serial en un clic (sans driver ni esptool) ou commande esptool. Modules : Evil Twin, portail captif, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code>. Usage éducatif, sur ton réseau uniquement.</p>
+      <p class="sub" data-i18n="hero_sub">EvilFox v2.0.0 — Evil Twin amélioré, vol d'identifiants, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code> / <code>FoXhack_Evil</code>. Usage éducatif, sur ton réseau uniquement.</p>
     </div>
     <figure class="ascii" aria-hidden="true"><b>      _,-=._              /|_/|
       `-.)   `=._,.-=-._.,  @ @._,
@@ -494,20 +322,18 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
             <div class="devices" id="devices" role="group" aria-label="Choix de l'appareil">
               <button class="dev" type="button" aria-pressed="false" data-key="esp32"
                       data-name="ESP32 Standard" data-chip="ESP32" data-off="0" data-manifest="manifest-esp32.json"
-                      data-bin="EvilFoX2-0-0.bin" data-dl="EvilFoX2-0-0.bin">
-                <img src="esp32.webp" alt="Carte de développement ESP32 flashée avec le firmware EvilFoX" width="64" height="48" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy" decoding="async">
+                      data-bin="EvilFoX1-0-2.bin" data-dl="https://github.com/FoX-hxck/EvilFoX/raw/refs/heads/main/EvilFoX1-0-2.bin">
+                <img src="esp32.png" alt="ESP32" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
                 <span>
                   <span class="n">ESP32</span>
-                  <span class="d">Firmware v2.0.0 · EvilFoX2-0-0.bin</span>
                 </span>
               </button>
               <button class="dev" type="button" aria-pressed="false" data-key="m5stick"
                       data-name="M5StickC Plus2" data-chip="ESP32" data-off="0" data-manifest="manifest-m5.json"
-                      data-bin="M5EvilFoX1-0-2.bin" data-dl="M5EvilFoX1-0-2.bin">
-                <img src="m5.webp" alt="M5StickC Plus2 de M5Stack avec le firmware EvilFoX" width="64" height="48" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy" decoding="async">
+                      data-bin="M5EvilFoX1-0-2.bin" data-dl="https://github.com/FoX-hxck/EvilFoX/raw/refs/heads/main/M5EvilFoX1-0-2.bin">
+                <img src="m5.png" alt="M5StickC Plus2" style="width:64px;height:48px;object-fit:contain;display:block" loading="lazy">
                 <span>
                   <span class="n">M5StickC Plus2</span>
-                  <span class="d">Écran 1,14" · A/B/C · M5EvilFoX1-0-2.bin</span>
                 </span>
               </button>
             </div>
@@ -572,7 +398,7 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
               <button class="btn" id="btnWipe" type="button" data-i18n="btn_wipe">vider journal</button>
               <button class="btn" id="btnSave" type="button" data-i18n="btn_save">exporter journal</button>
               <span class="sp"></span>
-              <a class="btn prime" href="https://github.com/F0X-hack/EvilFoX" target="_blank" rel="noopener noreferrer" data-i18n="btn_github">dépôt github</a>
+              <a class="btn prime" href="https://github.com/FoX-hxck/EvilFoX" target="_blank" rel="noopener noreferrer" data-i18n="btn_github">dépôt github</a>
             </div>
           </div>
         </div>
@@ -607,7 +433,7 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
           <div class="code">
             <button class="copy" id="copyCmd" type="button" data-done="0" data-i18n="copy">copier</button>
             <pre id="cmd"><span class="c"># erase then write combined image at 0x0</span>
-<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX2-0-0.bin</span></pre>
+<span class="p">$</span> esptool.py --chip <span class="f" id="cmdChip">esp32</span> -p <span class="f" id="cmdPort">/dev/ttyUSB0</span> -b 460800 --before default_reset --after hard_reset write_flash 0x0 <span class="f" id="cmdBin">EvilFoX1-0-2.bin</span></pre>
           </div>
           <div class="row" style="margin-top:.6rem">
             <button class="btn" id="copyCmd2" type="button" data-i18n="copy_no">copier sans le $</button>
@@ -725,33 +551,10 @@ footer .lg{color:var(--red);letter-spacing:.24em;font-weight:700}
     </div>
   </section>
 
-  <!-- ============ CONTENU ÉDITORIAL ============ -->
-  <!-- Texte réel, indexable : décrit l'outil, relie le sous-domaine au domaine principal foxhack.fr -->
-  <section class="about" id="about" aria-labelledby="aboutTitle">
-    <h2 id="aboutTitle"><span class="c">05 ·</span> <span data-i18n="about_t">Flasher EvilFoX sur ESP32 / M5StickC Plus2</span></h2>
-    <p class="lead" data-i18n="about_lead">EvilFoX est un projet de recherche en sécurité Wi-Fi pour microcontrôleurs : un firmware qui transforme une carte ESP32 ou un M5StickC Plus2 en outil de test réseau, et cette page qui l'installe en quelques secondes.</p>
-    <p data-i18n="about_p1">Le loader parle directement à la carte depuis le navigateur via l'API <strong>Web Serial</strong> (Chrome, Edge ou Opera de bureau), sans driver ni esptool : l'image combinée est écrite à l'offset <code>0x0</code>, l'appareil redémarre, et le panneau d'administration <code>192.168.4.1</code> est prêt. Ceux qui préfèrent la ligne de commande trouvent dans l'onglet <em>cli</em> la commande <code>esptool.py</code> complète, prête à copier, pour Linux, macOS ou Windows.</p>
-    <p data-i18n="about_p2">Une fois flashé, le firmware expose un panneau d'administration sur <code>http://192.168.4.1</code> (SSID <code>FoXhack</code>, mot de passe <code>FoXhack_Evil</code>) : scan continu des réseaux alentour avec canal et BSSID, sélection d'une cible, clonage en Evil Twin, portail captif avec templates de marque, upload de templates HTML personnalisés (le nom du fichier devient le SSID de l'attaque) et export CSV des identifiants capturés. Sur M5StickC Plus2, l'écran et les boutons A/B/C pilotent l'outil sans passer par le navigateur.</p>
-    <p data-i18n="about_p3"><strong>Cadre légal.</strong> EvilFoX est un outil de red team et de recherche : il ne doit servir que sur ton propre matériel et tes propres réseaux, ou dans le cadre d'un audit autorisé par écrit. Capturer des identifiants sur un réseau tiers est une infraction (article 323-1 et suivants du Code pénal).</p>
-    <ul>
-      <li data-i18n="about_l1">Deux binaires : <code>EvilFoX2-0-0.bin</code> (ESP32) et <code>M5EvilFoX1-0-2.bin</code> (M5StickC Plus2)</li>
-      <li data-i18n="about_l2">Flash web : aucun serveur intermédiaire, rien n'est téléversé</li>
-      <li data-i18n="about_l3">Diagnostic intégré de l'API Web Serial et du contexte de sécurité</li>
-      <li data-i18n="about_l4">Notes de version et dépannage pour chaque carte</li>
-    </ul>
-    <p class="src" data-i18n="about_src">Projet FoXhack — code source sur <a href="https://github.com/F0X-hack/EvilFoX" rel="noopener">GitHub</a>, autres projets et contact sur <a href="https://foxhack.fr/">foxhack.fr</a>.</p>
-  </section>
-
   <footer class="foot">
-    <span data-i18n="footer_t">EVILFOX PROJECT · 2026 · projet FoXhack — firmware sécurisé, droits respectés</span>
+    <span data-i18n="footer_t">EVILFOX PROJECT · 2025 · firmware sécurisé, droits respectés</span>
     <span class="lg">« STAY HOME, STAY SAFE, STAY HUNGRY »</span>
     <span id="perf">—</span>
-    <nav class="foot-nav" aria-label="Liens">
-      <a class="prime" href="https://foxhack.fr/" data-i18n="foot_site">← foxhack.fr</a>
-      <a href="https://github.com/F0X-hack/EvilFoX" target="_blank" rel="noopener noreferrer" data-i18n="foot_repo">dépôt GitHub</a>
-      <a href="#about" data-i18n="foot_about">à propos</a>
-      <a href="sitemap.xml" data-i18n="foot_sitemap">plan du site</a>
-    </nav>
   </footer>
 </div>
 
@@ -812,7 +615,7 @@ var I18N={
 fr:{
   secure_ctx:"contexte sécurisé",
   tag_loader:"firmware loader",
-  hero_sub:"EvilFoX v2.0.0 — loader de firmware pour ESP32 et M5StickC Plus2 : flash Web Serial en un clic (sans driver ni esptool) ou commande esptool. Modules : Evil Twin, portail captif, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code>. Usage éducatif, sur ton réseau uniquement.",
+  hero_sub:"EvilFox v2.0.0 — Evil Twin amélioré, vol d'identifiants, scan Wi-Fi, templates HTML custom. Admin : <code>192.168.4.1</code> / WiFi : <code>FoXhack</code> / <code>FoXhack_Evil</code>. Usage éducatif, sur ton réseau uniquement.",
   tab_web:"web flash", tab_cli:"cli · linux / macos", tab_diag:"diagnostic", tab_doc:"notes de version",
   target_panel:"cible", no_target:"aucune cible",
   kv_target:"cible", kv_chip:"chip family", kv_bin:"binaire", kv_manifest:"manifest",
@@ -856,23 +659,12 @@ fr:{
   log_wiped:"journal vidé", log_export:"journal exporté", blob_rejected:"blob refusé → fichier {0}", device_info:"device: {0} · {1} · {2}", manifest_loaded:"manifest chargé",
   lang_now:"interface en français", cli_fb:"module Web Tools indisponible (CDN hors-ligne ?) → passe par l'onglet CLI",
   sc_err:"CDN unpkg injoignable — mode CLI conseillé",
-  footer_t:"EVILFOX PROJECT · 2026 · projet FoXhack — firmware sécurisé, droits respectés",
-  foot_site:"← foxhack.fr", foot_repo:"dépôt GitHub", foot_about:"à propos", foot_sitemap:"plan du site",
-  about_t:"Flasher EvilFoX sur ESP32 / M5StickC Plus2",
-  about_lead:"EvilFoX est un projet de recherche en sécurité Wi-Fi pour microcontrôleurs : un firmware qui transforme une carte ESP32 ou un M5StickC Plus2 en outil de test réseau, et cette page qui l'installe en quelques secondes.",
-  about_p1:"Le loader parle directement à la carte depuis le navigateur via l'API <strong>Web Serial</strong> (Chrome, Edge ou Opera de bureau), sans driver ni esptool : l'image combinée est écrite à l'offset <code>0x0</code>, l'appareil redémarre, et le panneau d'administration <code>192.168.4.1</code> est prêt. Ceux qui préfèrent la ligne de commande trouvent dans l'onglet <em>cli</em> la commande <code>esptool.py</code> complète, prête à copier, pour Linux, macOS ou Windows.",
-  about_p2:"Une fois flashé, le firmware expose un panneau d'administration sur <code>http://192.168.4.1</code> (SSID <code>FoXhack</code>, mot de passe <code>FoXhack_Evil</code>) : scan continu des réseaux alentour avec canal et BSSID, sélection d'une cible, clonage en Evil Twin, portail captif avec templates de marque, upload de templates HTML personnalisés (le nom du fichier devient le SSID de l'attaque) et export CSV des identifiants capturés. Sur M5StickC Plus2, l'écran et les boutons A/B/C pilotent l'outil sans passer par le navigateur.",
-  about_p3:"<strong>Cadre légal.</strong> EvilFoX est un outil de red team et de recherche : il ne doit servir que sur ton propre matériel et tes propres réseaux, ou dans le cadre d'un audit autorisé par écrit. Capturer des identifiants sur un réseau tiers est une infraction (article 323-1 et suivants du Code pénal).",
-  about_l1:"Deux binaires : <code>EvilFoX2-0-0.bin</code> (ESP32) et <code>M5EvilFoX1-0-2.bin</code> (M5StickC Plus2)",
-  about_l2:"Flash web : aucun serveur intermédiaire, rien n'est téléversé",
-  about_l3:"Diagnostic intégré de l'API Web Serial et du contexte de sécurité",
-  about_l4:"Notes de version et dépannage pour chaque carte",
-  about_src:"Projet FoXhack — code source sur <a href=\"https://github.com/F0X-hack/EvilFoX\" rel=\"noopener\">GitHub</a>, autres projets et contact sur <a href=\"https://foxhack.fr/\">foxhack.fr</a>."
+  footer_t:"EVILFOX PROJECT · 2025 · firmware sécurisé, droits respectés"
 },
 en:{
   secure_ctx:"secure context",
   tag_loader:"firmware loader",
-  hero_sub:"EvilFoX v2.0.0 — firmware loader for ESP32 and M5StickC Plus2: one-click Web Serial flash (no driver, no esptool) or the esptool command line. Modules: Evil Twin, captive portal, Wi-Fi scan, custom HTML templates. Admin: <code>192.168.4.1</code> / WiFi: <code>FoXhack</code>. For educational use on your own network only.",
+  hero_sub:"EvilFox v2.0.0 — improved Evil Twin, credential harvesting, Wi-Fi scanning, custom HTML templates. Admin: <code>192.168.4.1</code> / WiFi: <code>FoXhack</code> / <code>FoXhack_Evil</code>. For educational use on your own network only.",
   tab_web:"web flash", tab_cli:"cli · linux / macos", tab_diag:"diagnostics", tab_doc:"release notes",
   target_panel:"target", no_target:"no target",
   kv_target:"target", kv_chip:"chip family", kv_bin:"binary", kv_manifest:"manifest",
@@ -916,18 +708,7 @@ en:{
   log_wiped:"log cleared", log_export:"log exported", blob_rejected:"blob refused → file {0}", device_info:"device: {0} · {1} · {2}", manifest_loaded:"manifest loaded",
   lang_now:"interface switched to english", cli_fb:"Web Tools module unavailable (CDN offline?) → use the CLI tab",
   sc_err:"CDN unpkg unreachable — CLI mode recommended",
-  footer_t:"EVILFOX PROJECT · 2026 · a FoXhack project — secure firmware, all rights respected",
-  foot_site:"← foxhack.fr", foot_repo:"GitHub repo", foot_about:"about", foot_sitemap:"sitemap",
-  about_t:"Flash EvilFoX on ESP32 / M5StickC Plus2",
-  about_lead:"EvilFoX is a Wi-Fi security research project for microcontrollers: firmware that turns an ESP32 or M5StickC Plus2 board into a network testing tool, plus this page that installs it in seconds.",
-  about_p1:"The loader talks to the board straight from the browser through the <strong>Web Serial</strong> API (desktop Chrome, Edge or Opera) — no driver, no esptool: the combined image is written at offset <code>0x0</code>, the device reboots, and the <code>192.168.4.1</code> admin panel is ready. Command-line users will find the full <code>esptool.py</code> command, ready to copy, in the <em>cli</em> tab for Linux, macOS and Windows.",
-  about_p2:"Once flashed, the firmware serves an admin panel on <code>http://192.168.4.1</code> (SSID <code>FoXhack</code>, password <code>FoXhack_Evil</code>): continuous scan of nearby networks with channel and BSSID, target selection, Evil Twin cloning, captive portal with brand templates, custom HTML template upload (the file name becomes the attack SSID) and CSV export of captured credentials. On the M5StickC Plus2, the screen and the A/B/C buttons drive the tool without a browser.",
-  about_p3:"<strong>Legal notice.</strong> EvilFoX is a red team and research tool: use it only on your own hardware and networks, or within a written, authorised engagement. Capturing credentials on a third-party network is an offence (art. 323-1 ff. of the French Penal Code).",
-  about_l1:"Two binaries: <code>EvilFoX2-0-0.bin</code> (ESP32) and <code>M5EvilFoX1-0-2.bin</code> (M5StickC Plus2)",
-  about_l2:"Web flash: no intermediate server, nothing is uploaded",
-  about_l3:"Built-in diagnostics for the Web Serial API and the secure context",
-  about_l4:"Release notes and troubleshooting for each board",
-  about_src:"A FoXhack project — source code on <a href=\"https://github.com/F0X-hack/EvilFoX\" rel=\"noopener\">GitHub</a>, more projects and contact on <a href=\"https://foxhack.fr/\">foxhack.fr</a>."
+  footer_t:"EVILFOX PROJECT · 2025 · secure firmware, all rights respected"
 }
 };
 function t(k){if(I18N[LANG]&&I18N[LANG][k]!=null)return I18N[LANG][k];return I18N.fr[k]}
@@ -938,11 +719,6 @@ function applyLang(){
     if(I18N[LANG]&&I18N[LANG][k]!=null)el.innerHTML=I18N[LANG][k];
   });
   $('#langBtn').innerHTML=LANG==="fr"?"<b>FR</b> / EN":"FR / <b>EN</b>";
-  /* la langue réellement affichée doit être annoncée au navigateur (et aux moteurs) */
-  root.lang=LANG;
-  D.title=LANG==="fr"
-    ? "EvilFoX — Firmware Loader ESP32 / M5StickC Plus2 | Web Serial & esptool"
-    : "EvilFoX — ESP32 / M5StickC Plus2 Firmware Loader | Web Serial & esptool";
   /* re-traduit les zones générées dynamiquement */
   if(current)pickDevice(current,true);
   modeLblUpdate();
@@ -1134,7 +910,7 @@ function copy(txt,btnId){
   }
   log(t("clip"),"in");
 }
-function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX2-0-0.bin")}
+function rawCmd(){return "esptool.py --chip esp32 -p "+port+" -b 460800 --before default_reset --after hard_reset write_flash 0x0 "+(current?devices[current].bin:"EvilFoX1-0-2.bin")}
 var port="/dev/ttyUSB0";
 $('#ports').addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
@@ -1153,7 +929,7 @@ function renderTree(){
   $('#tree').innerHTML=
   "<span class='c'>"+t("tree_root")+"</span>\n"+
   "index.html                    <span class='c'>"+t("tree_page")+"</span>\n"+
-  "EvilFoX2-0-0.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
+  "EvilFoX1-0-2.bin              <span class='c'>"+t("tree_esp32")+"</span>\n"+
   "M5EvilFoX1-0-2.bin            <span class='c'>"+t("tree_m5")+"</span>\n"+
   "manifest-esp32.json           <span class='c'>"+t("tree_opt")+"</span>\n"+
   "manifest-m5.json              <span class='c'>"+t("tree_opt2")+"</span>\n"+
@@ -1245,9 +1021,6 @@ rain();
   if(reduced)return;
   var h1=$('.brand h1');if(!h1)return;
   var base=h1.getAttribute("data-txt")||"EVILFOX";
-  /* le texte accessible (classe .sr) doit survivre aux cycles de glitch */
-  var srEl=h1.querySelector(".sr");
-  function setTxt(v){h1.textContent=v;if(srEl)h1.appendChild(srEl)}
   var glyphs="ABCDEF0123456789#%&@/\\|=+*<>$";
   var sl=function(i){return glyphs[(Math.random()*glyphs.length)|0]};
   var running=false;
@@ -1263,7 +1036,7 @@ rain();
       h1.textContent=s;h1.setAttribute("data-txt",s);
       if(n>=steps){
         setTimeout(function(){
-          setTxt(base);h1.setAttribute("data-txt",base);running=false;next();
+          h1.textContent=base;h1.setAttribute("data-txt",base);running=false;next();
         },40);
         return;
       }

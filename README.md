@@ -11,7 +11,7 @@
 
 EvilFoX est un **outil red team / pentest** portable basé sur l'ESP32. Il clone un réseau WiFi cible (Evil Twin), sert un portail captif réaliste avec des templates de marque, et capture silencieusement des identifiants - pour des tests de sécurité autorisés uniquement.
 
-> **Avertissement** - Pour **usage éducatif uniquement** et **tests autorisés** sur des réseaux qui vous appartiennent ou pour lesquels vous avez une autorisation écrite explicite. Toute utilisation non autorisée est illégale dans la plupart des juridictions. Vous êtes responsables de vos actions.
+> **Avertissement** - Pour **usage éducatif uniquement** et **tests autorisés** sur des réseaux qui vous appartiennent ou pour lesquels vous avez une autorisation écrite explicite. Toute utilisation non autorisée est illégale dans la plupart des juridictions. Vous êtes responsable de vos actions.
 
 ---
 
@@ -19,7 +19,7 @@ EvilFoX est un **outil red team / pentest** portable basé sur l'ESP32. Il clone
 
 Flash direct depuis le navigateur (Chromium, Web Serial) :
 
-> **[https://evilfox.foxhack.fr/](https://evilfox.foxhack.fr/)**
+> **[https://evilfox-q3jj.onrender.com/](https://evilfox-q3jj.onrender.com/)**
 
 Ou ouvrez `index.html` en local (`http://localhost`). Pas de driver à installer, pas d'esptool.
 
@@ -31,7 +31,7 @@ Ou ouvrez `index.html` en local (`http://localhost`). Pas de driver à installer
 | M5StickC Plus2 (1.14") | `M5EvilFoX1-0-2.bin` | 1.0.2 |
 
 - `manifest-esp32.json` / `manifest-m5.json` : manifests optionnels pour le flasher (blob auto-généré sinon).
-- `esp32.webp` / `m5.webp` : images des boards pour le sélecteur d'appareil (PNG équivalents conservés en source, `scripts/make-og-image.sh` régénère les deux formats).
+- `esp32.png` / `m5.png` : images des boards pour le sélecteur d'appareil.
 - Flash CLI (alternative) :
 
 ```bash
@@ -84,34 +84,6 @@ Connectez-vous au point d'accès, puis ouvrez l'URL sur n'importe quel appareil 
   - Le formulaire doit `POST` vers `/` avec des champs `email` et `password` (voir `Invite.html`).
 - **Templates inclus** - `template/` contient 12 portails de marque (`template.html` les rassemble pour téléchargement) : Starbucks, SNCF Connect, Quick, Monoprix, KFC, Free WiFi, Free Wifi Mcdo, E.Leclerc, Carrefour, Burger King, Basic Fit, Auchan.
 - **Export / Purge** - export CSV et purge depuis la page `/creds`.
-
----
-
-## SEO — site publié `evilfox.foxhack.fr`
-
-Le dépôt **est** le site (GitHub Pages / hébergement statique) : les fichiers listés ci-dessous sont servis tels quels et pilotent l'indexation du sous-domaine projet de [foxhack.fr](https://foxhack.fr/).
-
-| Fichier | Rôle |
-|---|---|
-| `index.html` | `<title>`, meta description, canonical `https://evilfox.foxhack.fr/`, Open Graph / Twitter Card, `hreflang` fr/en/x-default, données structurées JSON-LD (`WebSite`, `SoftwareApplication`, `BreadcrumbList`, `FAQPage`), section éditoriale indexable et liens vers le domaine principal |
-| `og-image.png` | Image d'aperçu 1200×630 (Open Graph, Twitter, Google Discover) |
-| `robots.txt` | `Allow: /` + déclaration du sitemap (aucune zone privée sur ce domaine) |
-| `sitemap.xml` | URL unique + images déclarées (`og-image.png`, `esp32.webp`, `m5.webp`) |
-| `manifest.webmanifest` | Manifest PWA (nom, icône, couleurs) |
-| `icon-192.png` | Icône 192×192 (favicon PNG + PWA) |
-| `EvilFoX1-0-2.bin/index.html` | Redirection de l'ancienne URL du binaire ESP32 vers la racine |
-
-Génération des images (Open Graph, icône, WebP) : `bash scripts/make-og-image.sh` — dépend d'ImageMagick et des polices DejaVu.
-
-Points reliés au référencement déjà en place côté HTML : titre unique orienté requête (« firmware loader ESP32 / M5StickC Plus2 »), texte d'accroche FR/EN, `lang` aligné sur la bascule de langue, `<h1>` avec équivalent texte pour lecteurs d'écran et moteurs, images en `width`/`height` + `loading="lazy"` (évite le décalage de mise en page), note légale explicite (contenu d'utilité, signal de qualité).
-
-### À faire hors dépôt (côté comptes et hébergeur)
-
-- **Google Search Console** : ajouter la propriété de domaine `foxhack.fr` (couvre tous les sous-domaines) puis soumettre `https://foxhack.fr/sitemap.xml` **et** `https://evilfox.foxhack.fr/sitemap.xml`.
-- **Bing Webmaster Tools** : même chose, import possible depuis Search Console.
-- **Maillage** : les sous-domaines projets font autorité s'ils sont liés depuis le domaine principal. `foxhack.fr` liste déjà EvilFoX, Reaper et FoX-HID dans `src/data/projects.ts` — vérifier que les ancres de cette section utilisent les libellés de projet (« EvilFoX », « firmware ESP32 ») plutôt que « VIEW PROJECT » seul.
-- **Partage social** : après déploiement, forcer la relecture de l'aperçu (Facebook Sharing Debugger, LinkedIn Post Inspector, `@card` Twitter) pour prendre en compte `og-image.png`.
-- **Anciens liens** : la page pointait vers `github.com/FoX-hxck/EvilFoX` (copie obsolète, compte distinct) ; elle pointe désormais vers le dépôt officiel `github.com/F0X-hack/EvilFoX`. Les éventuels liens externes vers l'ancien dépôt continuent de fonctionner.
 
 ---
 
