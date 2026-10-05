@@ -1,0 +1,29 @@
+{
+  "name": "EvilFoX — Firmware Loader",
+  "short_name": "EvilFoX",
+  "description": "Loader web pour flasher le firmware EvilFoX sur ESP32 et M5StickC Plus2 : Web Serial depuis le navigateur ou esptool en ligne de commande.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050506",
+  "theme_color": "#050506",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["security", "utilities", "developer tools"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
